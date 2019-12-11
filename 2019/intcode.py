@@ -5,22 +5,18 @@ class Intcode:
         C mode of 1st parameter
         B mode of 2nd parameter
         A mode of 3rd parameter
+
         0 position mode (default if omitted)
         1 immediate mode
-
-        opcodes
-        01 - add p1 + p2 result in p3
-        02 - mult p1 * p2 result in p3
-        03 - input to p1
-        04 - output from p1
-        05 -
+        2 relative mode
 
         inputs get popped from inputs
         outputs pushes to outputs
     '''
-    def __init__(self, data, inputs=[1], name='', verbose=False):
-        self.data = data
+    def __init__(self, data, inputs=[], name='', verbose=False):
+        self.data_raw = data
         self.pointer = 0
+        self.base = 0
         self.inputs = inputs
         self.name = name
         self.verbose = verbose
@@ -29,6 +25,9 @@ class Intcode:
         self.params = []
         self.instruction = None
         self.instruction_s = 0
+        self.data = {}
+        for n in range(len(self.data_raw)):
+            self.data[n] = self.data_raw[n]
         self.instruction_table = {
             1:  'add',           # val1 val2 out
             2:  'mult',          # val1 val2 out
@@ -38,21 +37,29 @@ class Intcode:
             6:  'jump-if-false', # condition jmp
             7:  'less-than',     # val1 val2 jmp
             8:  'equals',        # val1 val2 jmp
-            99: 'halt'          # (no args)
+            9:  'adjust-base',   # value
+            99: 'halt'           # (no args)
         }
+
+    def write_memory(self, file):
+        f = open(file, 'w')
+        for n in sorted(self.data.keys()):
+            f.write(f"{n} {self.data[n]}\n")
 
     def parse_instruction(self):
         self.params = []
         while len(self.instruction_s) < 5:
             self.instruction_s = '0' + self.instruction_s
         code = int(self.instruction_s[3:])
-        assert code in self.instruction_table.keys(), f"unknown instruction {instruction}"
+        assert code in self.instruction_table.keys(), f"unknown instruction {code}"
         self.instruction = self.instruction_table[code]
 
     def resolve_param(self, number):
-        value = self.data[self.pointer + number]
-        if number == 3 and self.instruction_s[0] == '0' or number == 2 and self.instruction_s[1] == '0' or number == 1 and self.instruction_s[2] == '0':
-            value = self.data[value]
+        value = self.check_data(self.pointer + number)
+        if number == 3 and self.instruction_s[0] == '2' or number == 2 and self.instruction_s[1] == '2' or number == 1 and self.instruction_s[2] == '2':
+            value = self.check_data(self.base + value)
+        elif number == 3 and self.instruction_s[0] == '0' or number == 2 and self.instruction_s[1] == '0' or number == 1 and self.instruction_s[2] == '0':
+            value = self.check_data(value)
         return value
 
     def is_running(self):
@@ -62,18 +69,46 @@ class Intcode:
         while self.run_instruction():
             True
 
+    def check_data(self, n):
+        if n not in self.data:
+            self.data[n] = 0
+        return self.data[n]
+
     def run_instruction(self):
+        self.check_data(self.pointer)
         self.instruction_s = str(self.data[self.pointer])
         self.parse_instruction()
-        if self.instruction == 'halt':  # 99
+        # 1 == add
+        if self.instruction == 'add':  # 01
+            if self.instruction_s[0] == '2':
+                value = self.check_data(self.pointer + 3)
+                self.data[self.base + value] = self.resolve_param(1) + self.resolve_param(2)
+            else:
+                self.data[self.data[self.pointer + 3]] = self.resolve_param(1) + self.resolve_param(2)
             if self.verbose:
-                print(f"{self.name} {self.pointer:3} {self.instruction:13} {self.instruction_s:5}")
-            return False
+                print(f"{self.name} {self.pointer:3} {self.instruction:13} {self.instruction_s:5} {self.resolve_param(1)} {self.resolve_param(2)}")
+            self.pointer += 4
+            return True
+        # 2 == mult
+        elif self.instruction == 'mult':  # 02
+            if self.instruction_s[0] == '2':
+                value = self.check_data(self.pointer + 3)
+                self.data[self.base + value] = self.resolve_param(1) * self.resolve_param(2)
+            else:
+                self.data[self.data[self.pointer + 3]] = self.resolve_param(1) * self.resolve_param(2)
+            if self.verbose:
+                print(f"{self.name} {self.pointer:3} {self.instruction:13} {self.instruction_s:5} {self.resolve_param(1)} {self.resolve_param(2)}")
+            self.pointer += 4
+            return True
         # 3 = input
         elif self.instruction == 'input':  # 03
             if len(self.inputs) == 0:
                 return False
-            self.data[self.data[self.pointer + 1]] = self.inputs[0]
+            if self.instruction_s[2] == '2':
+                value = self.check_data(self.pointer + 1)
+                self.data[self.base + value] = self.inputs[0]
+            else:
+                self.data[self.data[self.pointer + 1]] = self.inputs[0]
             self.inputs = self.inputs[1:]
             if self.verbose:
                 print(f"{self.name} {self.pointer:3} {self.instruction:13} {self.instruction_s:5} ({self.data[self.pointer + 1]}){self.data[self.data[self.pointer + 1]]}")
@@ -105,51 +140,53 @@ class Intcode:
                 self.pointer += 3
             return True
         # 7 = less than
-        elif self.instruction == 'less-than':  # 07  does 10007 works?
-            if self.verbose:
-                print(f"{self.name} {self.pointer:3} {self.instruction:13} {self.instruction_s:5} {self.resolve_param(1)} {self.resolve_param(2)} {self.resolve_param(3)}")
+        elif self.instruction == 'less-than':  # 07
             if self.resolve_param(1) < self.resolve_param(2):
-                if self.instruction_s[0] == '1':
-                    self.data[self.pointer + 3] = 1
+                if self.instruction_s[0] == '2':
+                    value = self.check_data(self.pointer + 3)
+                    self.data[self.base + value] = 1
                 else:
                     self.data[self.data[self.pointer + 3]] = 1
             else:
-                if self.instruction_s[0] == '1':
-                    self.data[self.pointer + 3] = 0
+                if self.instruction_s[0] == '2':
+                    value = self.check_data(self.pointer + 3)
+                    self.data[self.base + value] = 0
                 else:
                     self.data[self.data[self.pointer + 3]] = 0
+            if self.verbose:
+                print(f"{self.name} {self.pointer:3} {self.instruction:13} {self.instruction_s:5} {self.data[self.pointer+1]}[{self.resolve_param(1)}] {self.data[self.pointer+2]}[{self.resolve_param(2)}] {self.data[self.pointer + 3]}[{self.data[self.data[self.pointer + 3]]}]")
             self.pointer += 4
             return True
         # 8 = equals
-        elif self.instruction == 'equals':  # 08 does 10008 work?
+        elif self.instruction == 'equals':  # 08
             if self.verbose:
-                print(f"{self.name} {self.pointer:3} {self.instruction:13} {self.instruction_s:5} {self.resolve_param(1)} {self.resolve_param(2)} {self.resolve_param(3)}")
+                print(f"{self.name} {self.pointer:3} {self.instruction:13} {self.instruction_s:5} {self.resolve_param(1)} {self.resolve_param(2)} {self.data[self.pointer + 3]}")
             if self.resolve_param(1) == self.resolve_param(2):
-                if self.instruction_s[0] == '1':
-                    self.data[self.pointer + 3] = 1
+                if self.instruction_s[0] == '2':
+                    value = self.check_data(self.pointer + 3)
+                    self.data[self.base + value] = 1
                 else:
                     self.data[self.data[self.pointer + 3]] = 1
             else:
-                if self.instruction_s[0] == '1':
-                    self.data[self.pointer + 3] = 0
+                if self.instruction_s[0] == '2':
+                    value = self.check_data(self.pointer + 3)
+                    self.data[self.base + value] = 0
                 else:
                     self.data[self.data[self.pointer + 3]] = 0
             self.pointer += 4
             return True
-        # 1 == add
-        elif self.instruction == 'add':  # 01
+        # 9 = adjust-base
+        elif self.instruction == 'adjust-base':  # 09
+            self.base += self.resolve_param(1)
             if self.verbose:
-                print(f"{self.name} {self.pointer:3} {self.instruction:13} {self.instruction_s:5} {self.resolve_param(1)} {self.resolve_param(2)} {self.resolve_param(3)}")
-            self.data[self.data[self.pointer + 3]] = self.resolve_param(1) + self.resolve_param(2)
-            self.pointer += 4
+                print(f"{self.name} {self.pointer:3} {self.instruction:13} {self.instruction_s:5} {self.data[self.pointer+1]}[{self.resolve_param(1)}]  base={self.base}")
+            self.pointer += 2
             return True
-        # 2 == mult
-        elif self.instruction == 'mult':  # 02
+        # 99 = halt
+        if self.instruction == 'halt':  # 99
             if self.verbose:
-                print(f"{self.name} {self.pointer:3} {self.instruction:13} {self.instruction_s:5} {self.resolve_param(1)} {self.resolve_param(2)} {self.resolve_param(3)}")
-            self.data[self.data[self.pointer + 3]] = self.resolve_param(1) * self.resolve_param(2)
-            self.pointer += 4
-            return True
+                print(f"{self.name} {self.pointer:3} {self.instruction:13} {self.instruction_s:5}")
+            return False
 
 def test_intcode():
     intcode = Intcode([1002, 5, 2, 5, 99, 33], [], verbose=True)  # mult
@@ -242,3 +279,11 @@ def test_intcode():
     intcode = Intcode([1102, 10, 5, 3, 99], [], verbose=True)  # equals
     intcode.run()
     assert(intcode.data[3] == 50)
+
+    intcode = Intcode([109, 100, 99], [], verbose=True)  # equals
+    intcode.run()
+    assert(intcode.base == 100)
+
+    intcode = Intcode([9, 3, 99, 100], [], verbose=True)  # equals
+    intcode.run()
+    assert(intcode.base == 100)
