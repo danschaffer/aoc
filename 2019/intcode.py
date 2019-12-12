@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 class Intcode:
     '''
         ABCDE
@@ -13,13 +15,14 @@ class Intcode:
         inputs get popped from inputs
         outputs pushes to outputs
     '''
-    def __init__(self, data, inputs=[], name='', verbose=False):
+    def __init__(self, data, inputs=[], name='', verbose=False, manual_input=False):
         self.data_raw = data
         self.pointer = 0
         self.base = 0
         self.inputs = inputs
         self.name = name
         self.verbose = verbose
+        self.manual_input = manual_input
 
         self.outputs = []
         self.params = []
@@ -102,6 +105,8 @@ class Intcode:
             return True
         # 3 = input
         elif self.instruction == 'input':  # 03
+            if self.manual_input:
+                self.inputs = [int(input("enter input: ").strip())]
             if len(self.inputs) == 0:
                 return False
             if self.instruction_s[2] == '2':
@@ -287,3 +292,10 @@ def test_intcode():
     intcode = Intcode([9, 3, 99, 100], [], verbose=True)  # equals
     intcode.run()
     assert(intcode.base == 100)
+
+if __name__ == '__main__':
+    import sys
+    data = [int(n) for n in open(sys.argv[1]).read().strip().split(',')]
+    intcode = Intcode(data, verbose=True, manual_input=True)
+    intcode.run()
+    print(intcode.outputs)
