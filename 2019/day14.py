@@ -36,15 +36,14 @@ class Fuel:
                     self.state[name] += elements['inputs'][name]
         return self.state['ORE']
 
-def test_bug():
-    data = """
-1 ORE => 2 A
-1 A => 1 B
-1 A, 1 B => 1 FUEL
-    """
-    fuel = Fuel(data.strip().split('\n'))
-    import pdb; pdb.set_trace()
-    assert fuel.run() == 10
+# def test_bug():
+#     data = """
+# 1 ORE => 2 A
+# 1 A => 1 B
+# 1 A, 1 B => 1 FUEL
+#     """
+#     fuel = Fuel(data.strip().split('\n'))
+#     assert fuel.run() == 10
 
 # 1 FUEL => 1A 1B
 #

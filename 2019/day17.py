@@ -44,7 +44,7 @@ class Scaffolding:
 
 
 L5R8L6L10L6R8R10L6L6L6R8L6L
-
+"""
     def parse_output(self):
         output = ""
         x = 0
