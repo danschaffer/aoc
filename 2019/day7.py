@@ -71,7 +71,7 @@ def test_amplifier1():
     assert amplifier.run_one([1,0,4,3,2]) == 65210
 
 def test_part1():
-    with open('./in7.txt') as f:
+    with open('./day7.input') as f:
         input = [int(item) for item in f.read().strip().split(',')]
         amplifier= Amplifier(input)
         assert amplifier.run_perm_one() == 262086
@@ -84,7 +84,7 @@ def test_amplifier2():
     assert amplifier.run_two([9,7,8,5,6]) == 18216
 
 def test_part2():
-    with open('./in7.txt') as f:
+    with open('./day7.input') as f:
         input = [int(item) for item in f.read().strip().split(',')]
         amplifier= Amplifier(input)
         assert amplifier.run_perm_two() == 5371621

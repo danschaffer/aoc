@@ -4,7 +4,6 @@ class Moons:
     def __init__(self, positions):
         self.positions = positions
         self.velocity = [(0,0,0), (0,0,0), (0,0,0), (0,0,0)]
-        self.cache = []
 
     def calc_velocity(self, p1, p2):
         if p1 < p2:
@@ -89,23 +88,6 @@ def test_3():
         moons.set_velocity()
         moons.update_position()
     assert moons.calculate_energy() == 1940
-
-def test_4():
-    positions = [
-        (-8, -10, 0),
-        (5, 5, 10),
-        (2, -7, 3),
-        (9, -8, -3)
-    ]
-    moons = Moons(positions)
-    steps = 0
-    while True:
-        moons.set_velocity()
-        moons.update_position()
-        if {'p':{moons.positions},'v':{moons.velocity}} in self.cache:
-            print("done in {steps}")
-            break
-        steps += 1
 
 if __name__ == '__main__':
     positions = [
