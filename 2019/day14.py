@@ -1,50 +1,52 @@
 #!/usr/bin/env python
-
+import math
+import sys
 class Fuel:
     def __init__(self, lines):
-        self.rules = {}
+        self.recipes = {}
         for line in lines:
             self.parse(line)
 
     def parse(self, line):
         formula = line.split('=>')
         outputs = formula[1].strip().split(' ')
-        self.rules[outputs[1]] = {'amount': int(outputs[0]), 'inputs': {}}
+        self.recipes[outputs[1]] = {'amount': int(outputs[0]), 'inputs': {}}
         inputs = formula[0].strip().split(',')
         for input in inputs:
             tokens1 = input.strip().split(' ')
-            self.rules[outputs[1]]['inputs'][tokens1[1]] = int(tokens1[0])
+            self.recipes[outputs[1]]['inputs'][tokens1[1]] = int(tokens1[0])
 
-    def run(self, amount=1):
-        state = {'FUEL': amount}
-        items = ['FUEL']
-        import pdb; pdb.set_trace()
-        while items:
-            for item in items:
-                recipe = self.rules[item]
-                num = recipe['amount']
-                ingreds = recipe['inputs']
-                mult = (state[item] + num - 1) // num
-                for ingred in ingreds.keys():
-                    state[ingred] = state.get(ingreds[ingred], 0) + mult * ingreds[ingred]
-                state[item] -= mult * num
-            items = [ele for ele in state if state[ele] > 0 and ele !='ORE']
-        return state['ORE']
+    def run(self, amount):
+        orders = [{'name': 'FUEL', 'amount': amount}]
+        supply = {}
+        ores = 0
+        while orders:
+            order = orders.pop()
+            if order['name'] == 'ORE':
+                ores += order['amount']
+            elif order['amount'] <= supply.get(order['name'], 0):
+                supply[order['name']] -= order['amount']
+            else:
+                amount_needed = order['amount'] - supply.get(order['name'], 0)
+                recipe = self.recipes[order['name']]
+                batches = math.ceil(amount_needed / recipe['amount'])
+                for ingredient in recipe['inputs']:
+                    orders += [{'name': ingredient, 'amount': recipe['inputs'][ingredient] * batches}]
+                leftover_amount = batches * recipe['amount'] - amount_needed
+                supply[order['name']] = leftover_amount
+        return ores
 
-# def test_bug():
-#     data = """
-# 1 ORE => 2 A
-# 1 A => 1 B
-# 1 A, 1 B => 1 FUEL
-#     """
-#     fuel = Fuel(data.strip().split('\n'))
-#     assert fuel.run() == 2
-
-# 1 FUEL => 1A 1B
-#
-#
-#
-#
+    def run_part2(self):
+        low = 0
+        high = 10**12
+        while low < high -1:
+            mid = low + (high - low) // 2
+            answer = self.run(mid)
+            if answer > 10**12:
+                high = mid
+            else:
+                low = mid
+        return low
 
 def test1():
     data = """
@@ -194,4 +196,5 @@ if __name__ == '__main__':
 21 VMZFB, 2 LJWM => 1 PBFZ
     """
     fuel = Fuel(data.strip().split('\n'))
-    print(fuel.run())
+    print(f"part 1: {fuel.run(1)}")
+    print(f"part 2: {fuel.run_part2()}")
