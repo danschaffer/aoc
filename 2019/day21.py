@@ -16,19 +16,11 @@ class Springdroid:
             self.intcode.inputs = [ord(num) for num in list(data)]
             self.intcode.outputs = []
 
-    def run(self, data):
+    def run(self, steps_list):
+        steps = '\n'.join(steps_list) + '\n'
         self.intcode.run()
         print(self.output(self.intcode.outputs))
-        self.intcode.inputs = [ord(num) for num in list(data)]
-        self.intcode.outputs = []
-        self.intcode.run()
-        print(self.output(self.intcode.outputs))
-
-    def run_part2(self):
-        data = 'NOT A T\nNOT T T\nAND B T\nAND C T\nNOT T J\nAND D J\RUN\n'
-        self.intcode.run()
-        print(self.output(self.intcode.outputs))
-        self.intcode.inputs = [ord(num) for num in list(data)]
+        self.intcode.inputs = [ord(num) for num in list(steps)]
         self.intcode.outputs = []
         self.intcode.run()
         print(self.output(self.intcode.outputs))
@@ -50,25 +42,23 @@ class Springdroid:
                 results += [chr(ch)]
         return ''.join(results)
 
+def test1():
+    springdroid = Springdroid()
+    steps = ['OR A J', 'AND B J', 'AND C J', 'NOT J J', 'AND D J', 'WALK']
+    springdroid.run(steps)
+    assert springdroid.intcode.outputs[-1] == 19354083
+
+def test2():
+    springdroid = Springdroid()
+    steps = ['NOT C J', 'AND D J', 'NOT E T', 'NOT T T', 'OR H T', 'AND T J', 'NOT B T', 'AND D T', 'OR T J', 'NOT A T', 'OR T J', 'RUN']
+    springdroid.run(steps)
+    assert springdroid.intcode.outputs[-1] == 1143499964
+
+
 if __name__ == '__main__':
     springdroid = Springdroid()
-    part1 ="""NOT C J
-AND D J
-NOT A T
-OR T J
-WALK\n"""
-    springdroid.run(part1)  # 19354083
+    steps1 = ['OR A J', 'AND B J', 'AND C J', 'NOT J J', 'AND D J', 'WALK']
+    springdroid.run(steps1)  # 19354083
     springdroid = Springdroid()
-    part2 = """NOT C J
-AND D J
-NOT E T
-NOT T T
-OR H T
-AND T J
-NOT B T
-AND D T
-OR T J
-NOT A T
-OR T J
-RUN\n"""
-    springdroid.run(part2)  # 1143499964
+    steps2 = ['NOT C J', 'AND D J', 'NOT E T', 'NOT T T', 'OR H T', 'AND T J', 'NOT B T', 'AND D T', 'OR T J', 'NOT A T', 'OR T J', 'RUN']
+    springdroid.run(steps2)  # 1143499964
