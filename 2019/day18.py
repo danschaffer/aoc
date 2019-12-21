@@ -12,6 +12,22 @@ class Vault:
     def done(self, position):
         return len(position['keys']) == len(self.keys)
 
+    def find_location(self, object):
+        for pos in self.map:
+            if self.map[pos] == object:
+                return pos
+
+    def find_path(self, a, b):
+        keys = []
+        start = self.find_location(a)
+        goal = self.find_location(b)
+        paths = [{'loc': start, 'moves': []}]
+        while len(paths):
+            pos = paths.remove(0)
+            pos1 = {'loc': (paths['loc'][0]-1 , paths['loc'][1], 'moves': paths['moves'][:] + [paths['pos']]}
+            
+
+
     def print_move(self, move, message=''):
         moves = move['moves']
         keys = move['keys']

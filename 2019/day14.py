@@ -7,34 +7,29 @@ class Fuel:
             self.parse(line)
 
     def parse(self, line):
-        tokens = line.split('=>')
-        outputs = tokens[1].strip().split(' ')
+        formula = line.split('=>')
+        outputs = formula[1].strip().split(' ')
         self.rules[outputs[1]] = {'amount': int(outputs[0]), 'inputs': {}}
-        inputs = tokens[0].strip().split(',')
+        inputs = formula[0].strip().split(',')
         for input in inputs:
             tokens1 = input.strip().split(' ')
             self.rules[outputs[1]]['inputs'][tokens1[1]] = int(tokens1[0])
 
-    def run(self):
-        self.state = {'FUEL': 1}
-        while True:
-            keys = sorted(self.state, key=self.state.get)
-            if len(keys) == 1 and keys[0] == 'ORE':
-                break
-            first = keys[0]
-            if first == 'ORE':
-                first = keys[1]
-            goal = self.state[first]
-            actual = 0
-            del self.state[first]
-            while actual < goal:
-                elements = self.rules[first]
-                actual += elements['amount']
-                for name in elements['inputs'].keys():
-                    if name not in self.state.keys():
-                        self.state[name] = 0
-                    self.state[name] += elements['inputs'][name]
-        return self.state['ORE']
+    def run(self, amount=1):
+        state = {'FUEL': amount}
+        items = ['FUEL']
+        import pdb; pdb.set_trace()
+        while items:
+            for item in items:
+                recipe = self.rules[item]
+                num = recipe['amount']
+                ingreds = recipe['inputs']
+                mult = (state[item] + num - 1) // num
+                for ingred in ingreds.keys():
+                    state[ingred] = state.get(ingreds[ingred], 0) + mult * ingreds[ingred]
+                state[item] -= mult * num
+            items = [ele for ele in state if state[ele] > 0 and ele !='ORE']
+        return state['ORE']
 
 # def test_bug():
 #     data = """
@@ -43,7 +38,7 @@ class Fuel:
 # 1 A, 1 B => 1 FUEL
 #     """
 #     fuel = Fuel(data.strip().split('\n'))
-#     assert fuel.run() == 10
+#     assert fuel.run() == 2
 
 # 1 FUEL => 1A 1B
 #
