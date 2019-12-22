@@ -6,8 +6,8 @@ Advent of Code 2019
 Status
 ======
 
-Total = 35
+Total = 36
 
 - 0 stars: 18,20
-- 1 stars: 12,15,16
+- 1 stars: 12,15,16,22
 - 2 stars: 1,2,3,4,5,6,7,8,9,10,11,13,14,17,19,21
