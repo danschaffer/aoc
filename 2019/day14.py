@@ -16,7 +16,7 @@ class Fuel:
             tokens1 = input.strip().split(' ')
             self.recipes[outputs[1]]['inputs'][tokens1[1]] = int(tokens1[0])
 
-    def run(self, amount):
+    def run(self, amount=1):
         orders = [{'name': 'FUEL', 'amount': amount}]
         supply = {}
         ores = 0
@@ -36,13 +36,13 @@ class Fuel:
                 supply[order['name']] = leftover_amount
         return ores
 
-    def run_part2(self):
+    def run_bsearch(self, goal=10**12):
         low = 0
-        high = 10**12
+        high = goal
         while low < high -1:
             mid = low + (high - low) // 2
             answer = self.run(mid)
-            if answer > 10**12:
+            if answer > goal:
                 high = mid
             else:
                 low = mid
@@ -57,7 +57,6 @@ def test1():
 7 A, 1 D => 1 E
 7 A, 1 E => 1 FUEL
 """
-### 7A 1E
     fuel = Fuel(data.strip().split('\n'))
     assert fuel.run() == 31
 
@@ -88,6 +87,7 @@ def test3():
     """
     fuel = Fuel(data.strip().split('\n'))
     assert fuel.run() == 13312
+    assert fuel.run_bsearch() == 82892753
 
 def test4():
     data = """
@@ -106,6 +106,7 @@ def test4():
 """
     fuel = Fuel(data.strip().split('\n'))
     assert fuel.run() == 180697
+    assert fuel.run_bsearch() == 5586022
 
 def test5():
     data = """
@@ -129,6 +130,7 @@ def test5():
     """
     fuel = Fuel(data.strip().split('\n'))
     assert fuel.run() == 2210736
+    assert fuel.run_bsearch() == 460664
 
 if __name__ == '__main__':
     data = """
@@ -197,4 +199,4 @@ if __name__ == '__main__':
     """
     fuel = Fuel(data.strip().split('\n'))
     print(f"part 1: {fuel.run(1)}")
-    print(f"part 2: {fuel.run_part2()}")
+    print(f"part 2: {fuel.run_bsearch()}")
