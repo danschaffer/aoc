@@ -2,20 +2,47 @@
 import re
 class Vault:
     def __init__(self, text):
-        self.map = []
-        self.keys = {}
-        self.doors = {}
-        self.positions = []
-        self.cache = []
+        self.map = {}
+        self.doors = self.keys = {}
+        self.paths = {}
         self.parse_map(text.strip())
-
-    def done(self, position):
-        return len(position['keys']) == len(self.keys)
 
     def find_location(self, object):
         for pos in self.map:
             if self.map[pos] == object:
                 return pos
+
+    def is_key(self, object):
+        return not re.search('[a-z]', object) is None
+
+    def is_door(self, object):
+        return not re.search('[A-Z]', object) is None
+
+    def find_keys(self):
+        keys = []
+        for point in self.map:
+            if self.is_key(self.map[point]):
+                keys += [self.map[point]]
+        return sorted(keys)
+
+    def find_path(self, start, goal):
+        paths = [{'loc': start, 'moves': [], 'doors': []}]
+        cache = []
+        doors = []
+        while len(paths) > 0:
+            move = paths[0]
+            paths.remove(paths[0])
+            if move['loc'] == goal:
+                print(f"found path {self.map[start]} {self.map[goal]}")
+                return move
+            if self.is_door(self.map[move['loc']]):
+                move['doors'] = move['doors'][:] + [self.map[move['loc']].lower()]
+            cache += [move['loc']]
+            moves = self.add_moves(move)
+            for move in moves:
+                if move['loc'] not in cache:
+                    paths = paths[:] + [move]
+            paths.sort(key=lambda move: len(move['moves']))
 
     def print_move(self, move, message=''):
         moves = move['moves']
@@ -24,39 +51,54 @@ class Vault:
         print(f"{message} moves={moves} position={position} keys={keys}")
 
     def add_if_valid(self, position):
-        if position['loc'] not in self.map:
-            return
-#        import pdb; pdb.set_trace()
-#        self.print_move(position, "isvalid")
-        if position['loc'] in self.doors and self.doors[position['loc']] not in position['keys']:
-            self.print_move(position, f"no key {self.doors[position['loc']]}")
-            return
-        if {'loc': position['loc'], 'keys': position['keys']} in self.cache:
-            return
-        if position['loc'] in self.keys.keys() and self.keys[position['loc']] not in position['keys']:
-            self.print_move(position, f"got key {self.keys[position['loc']]}")
-            position['keys'] = position['keys'][:]
-            position['keys'] += self.keys[position['loc']]
-        self.cache += [{'loc': position['loc'][:], 'keys': position['keys'][:]}]
-#        self.print_move(position, "adding")
-        self.positions += [{'loc':position['loc'], 'keys': position['keys'], 'moves': position['moves']}]
+        if position['loc'] in self.map:
+            return [position]
+        return []
 
     def add_moves(self, position):
-        self.add_if_valid({'loc': (position['loc'][0] - 1, position['loc'][1]), 'keys': position['keys'], 'moves': position['moves'] + 1})
-        self.add_if_valid({'loc': (position['loc'][0] + 1, position['loc'][1]), 'keys': position['keys'], 'moves': position['moves'] + 1})
-        self.add_if_valid({'loc': (position['loc'][0], position['loc'][1] - 1), 'keys': position['keys'], 'moves': position['moves'] + 1})
-        self.add_if_valid({'loc': (position['loc'][0], position['loc'][1] + 1), 'keys': position['keys'], 'moves': position['moves'] + 1})
+        moves = [] + \
+        self.add_if_valid({'loc': (position['loc'][0] - 1, position['loc'][1]), 'moves': position['moves'] + [(position['loc'][0] - 1, position['loc'][1])], 'doors': position['doors']}) +\
+        self.add_if_valid({'loc': (position['loc'][0] + 1, position['loc'][1]), 'moves': position['moves'] + [(position['loc'][0] + 1, position['loc'][1])], 'doors': position['doors']}) +\
+        self.add_if_valid({'loc': (position['loc'][0], position['loc'][1] - 1), 'moves': position['moves'] + [(position['loc'][0], position['loc'][1] - 1)], 'doors': position['doors']}) +\
+        self.add_if_valid({'loc': (position['loc'][0], position['loc'][1] + 1), 'moves': position['moves'] + [(position['loc'][0], position['loc'][1] + 1)], 'doors': position['doors']})
+        return moves
+
+    def map_all_keys(self):
+        self.paths = {}
+        keys = self.find_keys() + ['@']
+        for k1 in keys:
+            self.paths[k1] = {}
+            for k2 in keys:
+                if k1 == k2:
+                    continue
+                self.paths[k1][k2] = self.find_path(self.find_location(k1), self.find_location(k2))
+
+    def update_keys(self, path, keys_left):
+        keys = []
+        for key in path['doors']:
+            if key in keys_left:
+                keys += [key]
+        path['doors'] = keys
 
     def run(self):
-        self.cache = [{'loc': self.positions[0]['loc'], 'keys': []}]
-        while len(self.positions):
-            self.positions.sort(key=lambda ele: ele['moves'])
-#            self.positions.sort(key=lambda ele: len(ele['keys']))
-            move = self.positions[0]
-            if self.done(move):
-                return move['moves']
-            del self.positions[0]
-            self.add_moves(move)
+        current = '@'
+        keys = self.find_keys()
+        self.map_all_keys()
+        moves = []
+        keys_left = keys[:]
+        while len(keys_left) > 0:
+            paths = []
+            for key in keys_left:
+                paths += [self.paths[current][key]]
+            for path in paths:
+                self.update_keys(path, keys_left)
+            paths.sort(key=lambda e: (len(e['doors']), len(e['moves'])))
+            move = paths[0]
+            keys_left.remove(self.map[move['loc']])
+            moves += move['moves']
+            current = self.map[moves[-1]]
+            print(f"{current} {moves}")
+        return len(moves)
 
     def parse_map(self, text):
         y = 0
@@ -64,51 +106,56 @@ class Vault:
             x = 0
             for item in list(line):
                 if re.search('[A-Za-z.@]', item):
-                    self.map += [(x, y)]
-                    node = {'location': (x,y)}
-                    if item == '@':
-                        self.positions = [{'loc': (x,y), 'keys': [], 'moves': 0}]
-                    if re.search('[A-Z]', item):
-                        self.doors[(x,y)] = item.lower()
-                    if re.search('[a-z]', item):
-                        self.keys[(x,y)] = item
+                    self.map[(x,y)] = item
                 x += 1
             y += 1
 
-    def test_1(self):
-        vault = Vault("""
+
+def test_1():
+    vault = Vault("""
 #########
 #b.A.@.a#
 #########
 """)
-        result = vault.run()
-        assert result == 8
+    assert vault.is_door('@') is False
+    assert vault.is_key('@') is False
+    assert vault.find_location('@') == (5, 1)
+    assert vault.find_location('a') == (7, 1)
+    path = vault.find_path(vault.find_location('@'), vault.find_location('a'))
+    assert path['doors'] == []
+    assert path['moves'] == [(6,1), (7,1)]
+    path = vault.find_path(vault.find_location('@'), vault.find_location('b'))
+    assert path['doors'] == ['a']
+    assert path['moves'] == [(4,1), (3,1), (2,1), (1,1)]
+    assert vault.find_keys() == ['a', 'b']
+    assert vault.run() == 8
 
-    def test_2(self):
-        vault = Vault("""
+def test_2():
+    vault = Vault("""
 ########################
 #f.D.E.e.C.b.A.@.a.B.c.#
 ######################.#
 #d.....................#
 ########################
 """)
-        result = vault.run()
-        assert result == 86
+    result = vault.run()
+    assert result == 86
 
-    def test_3(self):
-        vault = Vault("""
-#################
-#i.G..c...e..H.p#
-########.########
-#j.A..b...f..D.o#
-########@########
-#k.E..a...g..B.n#
-########.########
-#l.F..d...h..C.m#
-#################
-""")
-        result = vault.run()
-        assert result == 132
+#
+#     def test_3(self):
+#         vault = Vault("""
+# #################
+# #i.G..c...e..H.p#
+# ########.########
+# #j.A..b...f..D.o#
+# ########@########
+# #k.E..a...g..B.n#
+# ########.########
+# #l.F..d...h..C.m#
+# #################
+# """)
+#         result = vault.run()
+#         assert result == 132
 
 
 if __name__ == '__main__':
