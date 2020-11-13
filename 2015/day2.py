@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 def get_wrapping_list(wrap_list):
     return sum([get_wrapping(wrap) for wrap in wrap_list])
@@ -14,12 +14,12 @@ def get_ribbon(dimensions):
     dims = sorted([int(n) for n in dimensions.split('x')])
     return dims[0] + dims[0] + dims[1] + dims[1] + dims[0] * dims[1] * dims[2]
 
-def test_1():
+def test1():
     assert get_wrapping('2x3x4') == 58
     assert get_wrapping('1x1x10') == 43
     assert get_wrapping_list(['2x3x4', '1x1x10']) == 101
 
-def test_2():
+def test2():
     assert get_ribbon('2x3x4') == 34
     assert get_ribbon('1x1x10') == 14
     assert get_ribbon_list(['2x3x4', '1x1x10']) == 48
