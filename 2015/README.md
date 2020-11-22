@@ -6,8 +6,8 @@ Advent of Code 2015
 Status
 ======
 
-Total = 45
+Total = 46
 
-- 0 stars: 22,25
-- 1 stars: 19
+- 0 stars: 22
+- 1 stars: 19,25
 - 2 stars: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,20,21,23,24
