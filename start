@@ -4,8 +4,14 @@ year=2020
 if [ "$#" = "0" ]
 then
     day=$(date +%d)
+    year=$(date +%Y)
 else
     day=$1
+    year=$2
+    if [ "$year" == "" ]
+    then
+        year="2020"
+    fi
 fi
 out="$year/day${day}.py"
 data="$year/day${day}.input"
@@ -14,4 +20,4 @@ cp template.py $out
 sed -i "" "s|Day|Day${day}|g" $out
 sed -i "" "s|day|day${day}|g" $out
 echo "writing input to $data"
-curl -s -H "cookie: _ga=GA1.2.1881597541.1603830841; session=53616c7465645f5fb5774d785b3c32259a1cfc7eee9fa5d31e692210169a7ecd3895336377bfd0e51f566630b372c1c6; _gid=GA1.2.1543136271.1606684864" -o $data "https://adventofcode.com/${year}/day/${day}/input"
+curl -s -H "cookie: $COOKIE" -o $data "https://adventofcode.com/${year}/day/${day}/input"
