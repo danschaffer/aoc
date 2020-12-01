@@ -5,10 +5,13 @@ class Day:
         self.lines = []
 
     def load(self, file):
-        self.lines = open(file).strip().split('\n')
+        self.lines = open(file).read().strip().split('\n')
 
     def run_part1(self):
-        pass
+        return -1
+
+    def run_part2(self):
+        return -1
 
 def test1():
     test_day = Day()
@@ -18,4 +21,4 @@ if __name__ == '__main__':
     day = Day()
     day.load('./day.input')
     print(f"part 1: {day.run_part1()}")
-#    print(f"part 2: {day.run_part2()}")
+    print(f"part 2: {day.run_part2()}")

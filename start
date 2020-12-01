@@ -3,7 +3,7 @@
 year=2020
 if [ "$#" = "0" ]
 then
-    day=$(date +%d)
+    day=$(date +%-d)
     year=$(date +%Y)
 else
     day=$1
