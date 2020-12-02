@@ -48,7 +48,7 @@ def test2():
     test_day2 = Day2()
     test_day2.load('./day2.input')
     assert test_day2.run_part1() == 422
-    assert test_day2.run_part1() == 451
+    assert test_day2.run_part2() == 451
 
 if __name__ == '__main__':
     day2 = Day2()
