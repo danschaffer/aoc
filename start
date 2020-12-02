@@ -19,5 +19,6 @@ echo "writing template to $out"
 cp template.py $out
 sed -i "" "s|Day|Day${day}|g" $out
 sed -i "" "s|day|day${day}|g" $out
+chmod +x $out
 echo "writing input to $data"
 curl -s -H "cookie: $COOKIE" -o $data "https://adventofcode.com/${year}/day/${day}/input"

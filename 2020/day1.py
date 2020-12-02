@@ -4,7 +4,7 @@ from itertools import permutations
 from math import prod
 
 class Day1:
-    def __init__(self, numbers=[]):
+    def __init__(self, numbers=None):
         self.numbers = numbers
 
     def load(self, file):
