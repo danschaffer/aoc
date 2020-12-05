@@ -15,6 +15,15 @@ else
 fi
 out="$year/day${day}.py"
 data="$year/day${day}.input"
+
+if [ -f $out -o -f $data ]
+then
+    echo "error: files already exist"
+    echo " $out"
+    echo " $data"
+    exit 1
+fi
+
 echo "writing template to $out"
 cp template.py $out
 sed -i "" "s|Day|Day${day}|g" $out
