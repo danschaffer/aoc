@@ -24,6 +24,13 @@ then
     exit 1
 fi
 
+if [ "$COOKIE" == "" ]
+then
+    echo "COOKIE environment variable is not set"
+    echo "must be set to your the cookie: header when loading a valid input"
+    exit 1 
+fi
+
 echo "writing template to $out"
 cp template.py $out
 sed -i "" "s|Day|Day${day}|g" $out
