@@ -1,7 +1,7 @@
 **/.DS_Store
 **/__pycache__
 **/.idea
-**/env
+**/env*
 */.pytest_cache
 */.python-version
 .vscode
