@@ -6,8 +6,8 @@ Advent of Code 2020
 Status
 ======
 
-Total = 10
+Total = 14
 
 - 0 stars:
 - 1 stars:
-- 2 stars: 1,2,3,4,5
+- 2 stars: 1,2,3,4,5,6,7
