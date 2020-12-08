@@ -2,7 +2,7 @@
 
 class Day3:
     def __init__(self):
-        self.trees = []
+        self.trees = list()
         self.width = 0
         self.height = 0
 
@@ -46,6 +46,7 @@ def test2():
     assert test_day3.run_part2() == 5522401584
 
 if __name__ == '__main__':
+    print("advent of code: day3")
     day3 = Day3()
     day3.load('./day3.input')
     print(f"part 1: {day3.run_part1()}")

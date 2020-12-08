@@ -2,7 +2,7 @@
 import re
 class Day4:
     def __init__(self):
-        self.lines = []
+        self.lines = list()
 
     def load(self, file):
         self.lines = open(file).read().strip().split('\n') + [""]
@@ -65,6 +65,7 @@ class Day4:
         return count
 
 def test1():
+    print("advent of code: day4")
     test_day4 = Day4()
     test_day4.load('./day4-test.input')
     assert test_day4.run() == 2

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-import sys
+
 class Day7:
     def __init__(self):
-        self.data = {}
+        self.data = dict()
 
     def load(self, file):
         for line in open(file).read().strip().split('\n'):
             tokens = line.split()
-            name = tokens[0] + ' ' + tokens[1]
+            name = f"{tokens[0]} {tokens[1]}"
             self.data[name] = {}
             index = 4
             while True:
@@ -41,7 +41,7 @@ def test1():
     assert test_day7a.run_part2() == 126
 
 if __name__ == '__main__':
-    print(f"advent of code: day7")
+    print("advent of code: day7")
     day7 = Day7()
     day7.load('./day7.input')
     print(f"part 1: {len(day7.run_part1())}")

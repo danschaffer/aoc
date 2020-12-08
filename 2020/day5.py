@@ -2,7 +2,7 @@
 
 class Day5:
     def __init__(self):
-        self.lines = []
+        self.lines = list()
 
     def load(self, file):
         self.lines = open(file).read().strip().split('\n')
@@ -32,6 +32,7 @@ def test1():
     assert test_day5.run_part2() == 522
 
 if __name__ == '__main__':
+    print("advent of code: day5")
     day5 = Day5()
     day5.load('./day5.input')
     print(f"part 1: {day5.run_part1()}")

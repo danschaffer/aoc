@@ -39,6 +39,7 @@ def test2():
     assert test_day1a.run_part2() == 199068980
 
 if __name__ == '__main__':
+    print("advent of code: day1")
     day1 = Day1()
     day1.load('./day1.input')
     print(f"part 1: {day1.run_part1()}")

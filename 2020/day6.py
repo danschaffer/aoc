@@ -2,7 +2,7 @@
 
 class Day6:
     def __init__(self):
-        self.lines = []
+        self.lines = list()
 
     def load(self, file):
         self.lines = open(file).read().strip().split('\n') + [""]
@@ -27,7 +27,7 @@ class Day6:
         lines = 0
         for line in self.lines:
             if line.strip() == "":
-                count += sum([1 for key in data.keys() if data[key] == lines])
+                count += sum([1 for key in data if data[key] == lines])
                 data = {}
                 lines = 0
             else:
@@ -52,7 +52,7 @@ def test2():
     assert test_day6.run_part2() == 2971
 
 if __name__ == '__main__':
-    print(f"advent of code: day6")
+    print("advent of code: day6")
     day6 = Day6()
     day6.load('./day6.input')
     print(f"part 1: {day6.run_part1()}")

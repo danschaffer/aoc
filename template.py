@@ -21,7 +21,7 @@ def test1():
     assert test_day.run_part2() == -1
 
 if __name__ == '__main__':
-    print(f"advent of code: day")
+    print("advent of code: day")
     day = Day()
     day.load('./day.input')
     print(f"part 1: {day.run_part1()}")
