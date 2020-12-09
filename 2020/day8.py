@@ -55,27 +55,23 @@ def run_part2(file):
             newday = Day8(program1)
             newday.run()
             if newday.ip == len(program1):
-                print(index)
                 return newday.acc
         elif instruction == 'jmp':
             program1[index] = f"nop {parameter1}"
             newday = Day8(program1)
             newday.run()
             if newday.ip == len(program1):
-                print(index)
                 return newday.acc
 
 def test1():
     test_day8 = Day8(load('./day8-test.input'))
     assert test_day8.run_part1() == 5
+    assert run_part2('./day8-test.input') == 8
 
 def test2():
     test_day8 = Day8(load('./day8.input'))
     assert test_day8.run_part1() == 1501
-
-def test3():
-    assert run_part2('./day8-test.input') == 509
-
+    assert run_part2('./day8.input') == 509
 
 if __name__ == '__main__':
     print("advent of code: day8")
