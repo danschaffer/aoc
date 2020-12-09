@@ -1,7 +1,11 @@
 Advent of Code 2020
 ===================
 
+show test details:
 ```pytest -v *.py```
+
+show timing:
+```pytest --durations=0 *.py```
 
 Status
 ======

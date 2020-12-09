@@ -5,36 +5,36 @@ class Day8:
         self.program = program
         self.verbose = verbose
         self.acc = 0
-        self.ip = 0
+        self.inptr = 0
         self.log = set()
         self.count = 0
 
     def execute(self):
-        line = self.program[self.ip]
+        line = self.program[self.inptr]
         (instruction, parameter1) = line.split()
         parameter1 = int(parameter1)
         if instruction == 'acc':
             self.acc += parameter1
-            self.ip += 1
+            self.inptr += 1
         elif instruction == 'jmp':
-            self.ip += parameter1
+            self.inptr += parameter1
         elif instruction == 'nop':
-            self.ip += 1
+            self.inptr += 1
         else:
             assert False, f"unknown instruction {instruction}"
         self.count += 1
-        if self.ip in self.log:
+        if self.inptr in self.log:
             return False
-        self.log.add(self.ip)
+        self.log.add(self.inptr)
         return True
 
     def run(self):
         if self.verbose:
-            print(f"{self.program[self.count]} {self.ip} {self.acc}")
+            print(f"{self.program[self.count]} {self.inptr} {self.acc}")
         while self.execute():
             if self.verbose:
-                print(f"{self.program[self.count]} {self.ip} {self.acc}")
-            if self.ip == len(self.program):
+                print(f"{self.program[self.count]} {self.inptr} {self.acc}")
+            if self.inptr == len(self.program):
                 break
         return self.acc
 
@@ -54,13 +54,13 @@ def run_part2(file):
             program1[index] = f"jmp {parameter1}"
             newday = Day8(program1)
             newday.run()
-            if newday.ip == len(program1):
+            if newday.inptr == len(program1):
                 return newday.acc
         elif instruction == 'jmp':
             program1[index] = f"nop {parameter1}"
             newday = Day8(program1)
             newday.run()
-            if newday.ip == len(program1):
+            if newday.inptr == len(program1):
                 return newday.acc
 
 def test1():

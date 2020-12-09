@@ -45,6 +45,10 @@ class GameConsole:
             print(f"jmp {param1} acc:{self.accumulator} ip:{self.inst_ptr}")
         self.inst_ptr += int(param1)
 
+def test1():
+    assert GameConsole('./day8.input', stop_on_loop=True).run() == 1501
+    assert GameConsole('./day8.input.solution').run() == 509
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Game Console')
     parser.add_argument('--verbose', action='store_true', help='verbose output')
