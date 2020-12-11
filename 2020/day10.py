@@ -15,16 +15,13 @@ class Day10:
         return count1 * count3
 
     def run_part2(self):
-        combinations = [[0]]
-        while max(combinations[0]) != max(self.adapters):
-            combination = combinations.pop(0)
-            if max(combination) + 1 in self.adapters:
-                combinations += [combination + [max(combination) + 1]]
-            if max(combination) + 2 in self.adapters:
-                combinations += [combination + [max(combination) + 2]]
-            if max(combination) + 3 in self.adapters:
-                combinations += [combination + [max(combination) + 3]]
-        return len(combinations)
+        numbers = [0] + self.adapters
+        placeholders = [1] + [0 for x in range(len(numbers)-1)]
+        for index1, number in enumerate(numbers):
+            for index2 in range(1, 4):
+                if number + index2 in numbers:
+                    placeholders[numbers.index(number + index2)] += placeholders[index1]
+        return placeholders[-1]
 
 def test1():
     test_day10a = Day10('./day10-test2.input')
@@ -37,8 +34,14 @@ def test2():
     test_day10a = Day10('./day10-test1.input')
     assert test_day10a.run_part2() == 8
 
+    test_day10b = Day10('./day10-test2.input')
+    assert test_day10b.run_part2() == 19208
+
+    test_day10c = Day10('./day10.input')
+    assert test_day10c.run_part2() == 31581162962944
+
 if __name__ == '__main__':
     print("advent of code: day10")
     day10 = Day10('./day10.input')
     print(f"part 1: {day10.run_part1()}")
-#    print(f"part 2: {day10.run_part2()}")
+    print(f"part 2: {day10.run_part2()}")
