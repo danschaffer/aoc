@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import math
 from math import gcd
 from itertools import count
 import os
@@ -17,8 +16,8 @@ def run_part1(file):
     return (best-goal)*matches[best]
 
 def run_part2(file):
-    def lcm(a,b):
-        return a * b // gcd(a,b)
+    def lcm(first,second):
+        return first * second // gcd(first,second)
     line = file
     if os.path.exists(file):
         _, line = open(file).read().strip().split('\n')
