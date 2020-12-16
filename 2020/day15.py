@@ -9,7 +9,7 @@ def run_part1(numbers, rounds):
         last = numbers[-1]
         try:
             match = numbers[::-1][1:].index(last)
-        except:
+        except ValueError:
             match = -1
         numbers += [(match+1)]
     return numbers[-1]
@@ -35,7 +35,9 @@ def test1():
     assert run_part1('0,3,6', 10) == 0
     assert run_part1('1,3,2', 2020) == 1
     assert run_part1('./day15.input', 2020) == 1025
-    assert run_part1('0,3,6', 30000000) == 175594
+    assert run_part2('0,3,6', 30000000) == 175594
+    assert run_part2('./day15.input', 30000000) == 129262
+
 if __name__ == '__main__':
     print("advent of code: day15")
     print(f"part 1: {run_part1('./day15.input', 2020)}")
