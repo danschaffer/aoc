@@ -12,7 +12,7 @@ Status
 
 Total = 38
 
-** needed lots of help from solution threads on day19 p1,p2
+** needed lots of help from solution threads on day 15 p2, day19 p1,p2
 
 - 0 stars:
 - 1 stars: 
