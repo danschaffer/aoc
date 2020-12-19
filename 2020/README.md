@@ -10,8 +10,10 @@ show timing:
 Status
 ======
 
-Total = 36
+Total = 38
+
+** needed lots of help from solution threads on day19 p1,p2
 
 - 0 stars:
 - 1 stars: 
-- 2 stars: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18
+- 2 stars: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19
