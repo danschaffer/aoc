@@ -14,6 +14,6 @@ Total = 38
 
 ** needed lots of help from solution threads on day 15 p2, day19 p1,p2
 
-- 0 stars:
-- 1 stars: 
+- 0 stars: 20, 21
+- 1 stars: 22
 - 2 stars: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19
