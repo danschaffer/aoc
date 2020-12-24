@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 import sys
+# read about heaxagon coordinate and axial system here
+#   https://www.redblobgames.com/grids/hexagons/
 class Day24:
     def __init__(self):
         self.data = {}
 
     def process_line(self, line):
-        x, y = 0, 0
-        dirs = {
+        col, row = 0, 0
+        directions = {
             'e': (1,0),
             'w': (-1,0),
             'se': (0,1),
@@ -16,15 +18,15 @@ class Day24:
         }
         index = 0
         while index < len(line):
-            dir = line[index]
+            direction = line[index]
             index += 1
-            if dir == 's' or dir =='n':
-                dir += line[index]
+            if direction == 's' or direction =='n':
+                direction += line[index]
                 index += 1
-            x += dirs[dir][0]
-            y += dirs[dir][1]
-        return (x,y)
-    
+            col += directions[direction][0]
+            row += directions[direction][1]
+        return (col,row)
+
     def get_neighbors(self,coord):
         result = 0
         neighbors = [(1,0),(-1,0),(0,-1),(1,-1),(-1,1),(0,1)]
@@ -45,7 +47,7 @@ class Day24:
         return self.get_count()
 
     def run_part2(self):
-        for counter in range(100):
+        for _ in range(100):
             data0 = {}
 #            print(f"{counter} {self.get_count()}")
             maxx = -1*sys.maxsize
@@ -57,9 +59,9 @@ class Day24:
                 miny = min(miny, coord[1])
                 maxx = max(maxx, coord[0])
                 maxy = max(maxy, coord[1])
-            for x in range(minx-2,maxx+2):
-                for y in range(miny-2, maxy+2):
-                    coord = (x,y)
+            for col in range(minx-2,maxx+2):
+                for row in range(miny-2, maxy+2):
+                    coord = (col,row)
                     neighbors = self.get_neighbors(coord)
                     if coord not in self.data or self.data[coord] == 0:
                         if neighbors == 2:
