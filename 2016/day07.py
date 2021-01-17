@@ -27,8 +27,9 @@ def is_line_valid(line,part2=False):
         for string in strings0:
             abas = get_aba(string)
             for aba in abas:
-                if get_bab(aba) in strings1:
-                    return True
+                for string1 in strings1:
+                    if get_bab(aba) in string1:
+                        return True
         return False
 
 def get_bab(string):
@@ -37,8 +38,8 @@ def get_bab(string):
 def get_aba(string):
     results = []
     for index in range(len(string)-2):
-        if string[index] == string[index+2]:
-            results.append(string[index:index+2])
+        if string[index] == string[index+2] and string[index] != string[index+1]:
+            results.append(string[index:index+3])
     return results
 
 def is_string_valid1(string):
@@ -60,8 +61,9 @@ def test1():
     assert run_part1('./day07-test.input') == 2
     assert run_part1('./day07.input') == 105
     assert run_part2('./day07-test2.input') == 3
+    assert run_part2('./day07.input') == 258
 
 if __name__ == '__main__':
     print("advent of code: day07")
     print(f"part 1: {run_part1('./day07.input')}")
-    print(f"part 2: {run_part2('./day07.input')}")
+    print(f"part 2: {run_part2('./day07.input')}")  # 242 too low 259 too high
