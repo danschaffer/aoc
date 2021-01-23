@@ -102,7 +102,7 @@ class Day11:
         states = []
         heapq.heappush(states, (0, (0,0,self.state0)))
         while len(states):
-            point, (elevator, movenum, state) = heapq.heappop(states)
+            _, (elevator, movenum, state) = heapq.heappop(states)
 #            print(f"point {point} move {movenum} elevator {elevator} {state}")
             for elevator0, state0 in self.get_moves(elevator, state):
                 if not self.is_state_ok(state0):
