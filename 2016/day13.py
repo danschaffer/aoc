@@ -23,9 +23,6 @@ class Day13:
             moves.append((x,y+1))
         return moves
 
-    def get_distance(self, location):
-        return abs(location[0] - self.goal[0]) + abs(location[1] - self.goal[1])
-
     def run(self, part2=False):
         cache = []
         frontier = []
