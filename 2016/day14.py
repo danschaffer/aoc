@@ -14,6 +14,11 @@ class Day14:
             for line in open(self.cache).read().strip().split('\n'):
                 parts = line.split()
                 self.cachedata[int(parts[0])] = parts[1]
+        else:
+            for n in range(25000):
+                if n % 1000 == 0:
+                    print(n)
+                self.cachedata[n] = self.get_hash(n)
 
     def get_hash(self, index):
         if index in self.cachedata:
