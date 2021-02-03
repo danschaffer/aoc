@@ -3,14 +3,18 @@ import time
 class Day23:
     def __init__(self, file, verbose=False):
         self.verbose = verbose
-        self.reset()
         self.instructions = {
             'cpy': self.cpy,
             'inc': self.inc,
             'dec': self.dec,
             'jnz': self.jnz,
-            'tgl': self.tgl
+            'tgl': self.tgl,
+            'nop': self.nop,
+            'mul': self.mul
         }
+        self.instruction_pointer = 0
+        self.executions = 0
+        self.registers = {'a':0, 'b':0, 'c':0, 'd':0}
         self.lines = open(file).read().strip().split('\n')
         self.lines_original = self.lines[:]
 
@@ -39,6 +43,28 @@ class Day23:
             self.lines[self.instruction_pointer + value] = ' '.join(target)
             if self.verbose:
                 print(f"{self.instruction_pointer} tgl {args[0]} {self.registers} {self.lines[self.instruction_pointer + value]}")
+        self.instruction_pointer += 1
+
+    def mul(self, args):
+        num1 = args[0]
+        num2 = args[1]
+        if num1 in self.registers:
+            num1 = self.registers[num1]
+        else:
+            value = int(num1)
+        if num2 in self.registers:
+            num2 = self.registers[num2]
+        else:
+            value = int(num2)
+        target = args[2]
+        self.registers[target] = num1 * num2
+        if self.verbose:
+            print(f"{self.instruction_pointer} mul {num1} {num2} {target} {self.registers}")
+        self.instruction_pointer += 1
+
+    def nop(self, args):
+        if self.verbose:
+            print(f"{self.instruction_pointer} nop {self.registers}")
         self.instruction_pointer += 1
 
     def cpy(self, args):
@@ -100,11 +126,15 @@ class Day23:
             function = parts[0]
             args = parts[1:]
             self.instructions[function](args)
+            self.executions += 1
+            if self.executions % 100000 == 0:
+                print(f"{self.executions} {self.instruction_pointer} {self.registers}")
         return self.registers['a']
 
     def reset(self):
         self.lines = self.lines_original[:]
         self.instruction_pointer = 0
+        self.executions = 0
         self.registers = {'a':0, 'b':0, 'c':0, 'd':0}
 
 def test1():
@@ -120,5 +150,4 @@ if __name__ == '__main__':
     print(f"part 1: {day23.run()}")
     day23.reset()
     day23.registers['a'] = 12
-    start = time.time()
-    print(f"part 2: {day23.run()} {round(time.time()-start,1)}s")
+    print(f"part 2: {day23.run()}")
