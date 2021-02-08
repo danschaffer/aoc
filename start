@@ -13,8 +13,9 @@ else
         year="2020"
     fi
 fi
-out="$year/day${day}.py"
-data="$year/day${day}.input"
+day0=$(echo $day | awk '{if (length($1)==1) printf("0%s",$1); else print $1;}')
+out="$year/day${day0}.py"
+data="$year/day${day0}.input"
 
 if [ -f $out -o -f $data ]
 then
@@ -33,8 +34,8 @@ fi
 
 echo "writing template to $out"
 cp template.py $out
-sed -i "" "s|Day|Day${day}|g" $out
-sed -i "" "s|day|day${day}|g" $out
+sed -i "" "s|Day|Day${day0}|g" $out
+sed -i "" "s|day|day${day0}|g" $out
 chmod +x $out
 echo "writing input to $data"
 curl -s -H "cookie: $COOKIE" -o $data "https://adventofcode.com/${year}/day/${day}/input"
