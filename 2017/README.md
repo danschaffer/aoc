@@ -6,8 +6,8 @@ Advent of Code 2017
 Status
 ======
 
-Total = 20
+Total = 22
 
 - 0 stars:
 - 1 stars: 
-- 2 stars: 1,2,3,4,5,6,7,8,9,10
+- 2 stars: 1,2,3,4,5,6,7,8,9,10,11
