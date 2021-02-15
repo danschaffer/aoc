@@ -31,7 +31,7 @@ def test1():
     assert day6('0 2 7 0',part2=True) == 4
 
     assert day6('5	1	10	0	1	7	13	14	3	12	8	10	7	12	0	6') == 5042
-    assert day6('5	1	10	0	1	7	13	14	3	12	8	10	7	12	0	6') == 1086
+    assert day6('5	1	10	0	1	7	13	14	3	12	8	10	7	12	0	6', part2=True) == 1086
 
 if __name__ == '__main__':
     print("advent of code: day06")
