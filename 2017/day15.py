@@ -30,4 +30,4 @@ if __name__ == '__main__':
     start = time.time()
     print(f"part 1: {day15(591,393)} {round(time.time()-start,1)}s")
     start = time.time()
-    print(f"part 1: {day15(591,393,part2=True,iterations=5000000)} {round(time.time()-start,1)}s")
+    print(f"part 1: {day15(591,393,part2=True,iterations=5000000)} {round(time.time()-start,1)}s")  # 66s
