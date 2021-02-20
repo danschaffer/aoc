@@ -56,6 +56,11 @@ class Day20:
         return len(self.data)
 
 def test1():
+    day20 = Day20('./day20-test.input')
+    assert day20.run1() == 0
+    day20 = Day20('./day20-test2.input')
+    assert day20.run2() == 1
+
     day20 = Day20('./day20.input')
     assert day20.run1() == 172
     day20 = Day20('./day20.input')
