@@ -16,6 +16,7 @@ fi
 day0=$(echo $day | awk '{if (length($1)==1) printf("0%s",$1); else print $1;}')
 out="$year/day${day0}.py"
 data="$year/day${day0}.input"
+touch "$year/day${day0}-test.input"
 
 if [ -f $out -o -f $data ]
 then
