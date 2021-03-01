@@ -8,6 +8,8 @@ solutions.
 
 - 2020 50 points, needed lots of help on about 5 problems
 - 2019 42 points, completed all 1 stars, didn't get 8 of the 2 stars
+- 2018 ?
+- 2017 50 points, completed all solutions in Feb 2021
 - 2016 50 points, completed all solutions in Feb 2021
 - 2015 50 points, completed all solutions in Nov 2020
 
