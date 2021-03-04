@@ -1,4 +1,5 @@
-input = open('./day5-input.txt').read()
+#!/usr/bin/env python
+input = open('./day05.input').read()
 #input = 'dabAcCaCBAcCcaDA'
 
 def reduce_all(s):
@@ -17,7 +18,7 @@ def remove(input, ch):
 
 def part1(input):
   while True:
-    print(len(input))
+#    print(len(input))
     input1 = reduce_all(input)
     if input == input1:
       break
@@ -43,15 +44,15 @@ def part2(input):
 #    print(input1)
     while True:
       input2 = reduce_all(input1)
-      print(len(input2))
+#      print(len(input2))
       if input2 == input1:
         break
       input1 = input2
     if len(input2) < best:
       best = len(input2)
-    print(f"element {element} {len(input2)}")
+#    print(f"element {element} {len(input2)}")
   print(best)
 
-#part1(input) # 10804
-print(input)
+part1(input) # 10804
+#print(input)
 part2(input)

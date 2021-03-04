@@ -1,9 +1,10 @@
+#!/usr/bin/env python
 import datetime
 results = {}
 
 def sort_lines():
     data = {}
-    for line in open('./day4-input.txt').read().split('\n'):
+    for line in open('./day04.input').read().split('\n'):
         fields = line.split(' ')
         year = int(fields[0][1:5])
         month = int(fields[0][6:8])
@@ -16,16 +17,17 @@ def sort_lines():
     sorted_lines = []
     for dt in sorted(data.keys()):
         sorted_lines += [data[dt]]
-    open('day4-input-sorted.txt', 'w').write("\n".join(sorted_lines))
+    open('day04.input-sorted', 'w').write("\n".join(sorted_lines))
 
 def process1():
     ct = 0
     start = -1
 
-    for line in open('./day4-input-sorted.txt').read().split('\n'):
+    for line in open('./day04.input-sorted').read().split('\n'):
         tokens = line.split(' ')
         if len(tokens)<4:
             continue
+        print(line)
         minute = int(tokens[2][3:5])
         action = tokens[3]
 
@@ -51,7 +53,7 @@ def process2():
     ct = 0
     start = -1
 
-    for line in open('./day4-input-sorted.txt').read().split('\n'):
+    for line in open('./day04.input-sorted').read().split('\n'):
         tokens = line.split(' ')
         if len(tokens)<4:
             continue
@@ -76,6 +78,6 @@ def process2():
     print(data[0])
     print(f"answer: {data[0][0] * index}")
 
-#sort_lines()
-#process1()
+sort_lines()
+process1()
 process2()
