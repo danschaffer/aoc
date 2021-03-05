@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 class Node:
     def __init__(self):
         self.metadata = []
@@ -10,15 +11,6 @@ class Node:
 
     def add_metadata(self, metadata):
         self.metadata += [metadata]
-
-    @property
-    def metadata(self):
-        return self.metadata
-
-    @property
-    def children(self):
-        return self.children
-
 
 def parse(node, inputs):
     if len(inputs) == 0:

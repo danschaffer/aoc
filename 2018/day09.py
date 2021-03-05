@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 class Marble:
     def __init__(self, number, left=None, right=None):
         self.number = number
@@ -6,26 +7,6 @@ class Marble:
         self.left = left
         if not right:
             right = self
-        self.right = right
-
-    @property
-    def number(self):
-        return number
-
-    @property
-    def left(self):
-        return left
-
-    @left.setter
-    def left(self, left):
-        self.left = left
-
-    @property
-    def right(self):
-        return right
-
-    @right.setter
-    def right(self, right):
         self.right = right
 
     def __str__(self):
@@ -55,14 +36,6 @@ class Board:
             cw2.left = marble
             self._current = marble
         return score
-
-    @property
-    def current(self):
-        return self._current
-
-    @current.setter
-    def current(self, marble):
-        self._current = marble
 
 class Game:
     def __init__(self, players, marbles):
