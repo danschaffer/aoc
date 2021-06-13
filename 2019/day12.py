@@ -1,60 +1,40 @@
 #!/usr/bin/env python
 
-class Moons:
-    def __init__(self, positions):
-        self.positions = positions
-        self.velocity = [(0,0,0), (0,0,0), (0,0,0), (0,0,0)]
+class Moon:
+    def __init__(self, coords):
+        self.pos = [int(x) for x in coords]
+        self.vel = [0, 0, 0]
 
-    def calc_velocity(self, p1, p2):
-        if p1 < p2:
-            return 1
-        if p1 > p2:
-            return -1
-        return 0
+def energy(moons):
+    return sum([sum(map(abs, m.pos)) * sum(map(abs, m.vel)) for m in moons])
 
-    def calculate_energy(self):
-        total = 0
-        for n in range(4):
-            pot = abs(self.positions[n][0]) + abs(self.positions[n][1]) + abs(self.positions[n][2])
-            kin = abs(self.velocity[n][0]) + abs(self.velocity[n][1]) + abs(self.velocity[n][2])
-            total += pot * kin
-        return total
-
-    def update_position(self):
-        for n in range(4):
-            self.positions[n] = (self.positions[n][0] + self.velocity[n][0], self.positions[n][1] + self.velocity[n][1], self.positions[n][2] + self.velocity[n][2])
-
-    def to_str(self):
-        out = ''
-        for n in range(4):
-            out += f"{self.positions[n][0]}{self.positions[n][1]}{self.positions[n][2]}{self.velocity[n][0]}{self.velocity[n][1]}{self.velocity[n][2]}"
-        return out
-
-    def set_velocity(self):
-        x = self.velocity[0][0] + self.calc_velocity(self.positions[0][0], self.positions[1][0]) + self.calc_velocity(self.positions[0][0], self.positions[2][0]) + self.calc_velocity(self.positions[0][0], self.positions[3][0])
-        y = self.velocity[0][1] + self.calc_velocity(self.positions[0][1], self.positions[1][1]) + self.calc_velocity(self.positions[0][1], self.positions[2][1]) + self.calc_velocity(self.positions[0][1], self.positions[3][1])
-        z = self.velocity[0][2] + self.calc_velocity(self.positions[0][2], self.positions[1][2]) + self.calc_velocity(self.positions[0][2], self.positions[2][2]) + self.calc_velocity(self.positions[0][2], self.positions[3][2])
-        self.velocity[0] = (x, y, z)
-        x = self.velocity[1][0] + self.calc_velocity(self.positions[1][0], self.positions[0][0]) + self.calc_velocity(self.positions[1][0], self.positions[2][0]) + self.calc_velocity(self.positions[1][0], self.positions[3][0])
-        y = self.velocity[1][1] + self.calc_velocity(self.positions[1][1], self.positions[0][1]) + self.calc_velocity(self.positions[1][1], self.positions[2][1]) + self.calc_velocity(self.positions[1][1], self.positions[3][1])
-        z = self.velocity[1][2] + self.calc_velocity(self.positions[1][2], self.positions[0][2]) + self.calc_velocity(self.positions[1][2], self.positions[2][2]) + self.calc_velocity(self.positions[1][2], self.positions[3][2])
-        self.velocity[1] = (x, y, z)
-        x = self.velocity[2][0] + self.calc_velocity(self.positions[2][0], self.positions[0][0]) + self.calc_velocity(self.positions[2][0], self.positions[1][0]) + self.calc_velocity(self.positions[2][0], self.positions[3][0])
-        y = self.velocity[2][1] + self.calc_velocity(self.positions[2][1], self.positions[0][1]) + self.calc_velocity(self.positions[2][1], self.positions[1][1]) + self.calc_velocity(self.positions[2][1], self.positions[3][1])
-        z = self.velocity[2][2] + self.calc_velocity(self.positions[2][2], self.positions[0][2]) + self.calc_velocity(self.positions[2][2], self.positions[1][2]) + self.calc_velocity(self.positions[2][2], self.positions[3][2])
-        self.velocity[2] = (x, y, z)
-        x = self.velocity[3][0] + self.calc_velocity(self.positions[3][0], self.positions[0][0]) + self.calc_velocity(self.positions[3][0], self.positions[1][0]) + self.calc_velocity(self.positions[3][0], self.positions[2][0])
-        y = self.velocity[3][1] + self.calc_velocity(self.positions[3][1], self.positions[0][1]) + self.calc_velocity(self.positions[3][1], self.positions[1][1]) + self.calc_velocity(self.positions[3][1], self.positions[2][1])
-        z = self.velocity[3][2] + self.calc_velocity(self.positions[3][2], self.positions[0][2]) + self.calc_velocity(self.positions[3][2], self.positions[1][2]) + self.calc_velocity(self.positions[3][2], self.positions[2][2])
-        self.velocity[3] = (x, y, z)
+def lcm(x, y):
+    a, b = x, y
+    while a:
+        a, b = b % a, a
+    return x // b * y
 
 def test_1():
-    positions = [
+    moons_coord = [
         (-1, 0, 2),
         (2, -10, -7),
         (4, -8, 8),
         (3, 5, -1)
     ]
+    moons = [Moon(m) for m in moons_coord]
+    for t in range(10):
+        for moon in moons:
+            for other_moon in moons:
+                for i in range(3):
+                    if moon.pos[i] < other_moon.pos[i]:
+                        moon.vel[i] += 1
+                    elif moon.pos[i] > other_moon.pos[i]:
+                        moon.vel[i] += -1
+        for moon in moons:
+            for i in range(3):
+                moon.pos[i] += moon.vel[i]
+    assert energy(moons) == 179
+
     moons = Moons(positions)
     moons.set_velocity()
     moons.update_position()
@@ -90,34 +70,52 @@ def test_3():
     assert moons.calculate_energy() == 1940
 
 if __name__ == '__main__':
-    positions = [
+#    moons_coord = [
+#        (-1, 0, 2),
+#        (2, -10, -7),
+#        (4, -8, 8),
+#        (3, 5, -1)
+#    ]
+    moons_coord = [
         (-4, -9, -3),
         (-13, -11, 0),
         (-17, -7, 15),
         (-16, 4, 2)
     ]
-    moons = Moons(positions)
-    for _ in range(1000):
-        moons.set_velocity()
-        moons.update_position()
-    print(f"input 1: {moons.calculate_energy()}")
+    moons = [Moon(m) for m in moons_coord]
+#    for t in range(10):
+    for t in range(1000):
+        for moon in moons:
+            for other_moon in moons:
+                for i in range(3):
+                    if moon.pos[i] < other_moon.pos[i]:
+                        moon.vel[i] += 1
+                    elif moon.pos[i] > other_moon.pos[i]:
+                        moon.vel[i] += -1
+        for moon in moons:
+            for i in range(3):
+                moon.pos[i] += moon.vel[i]
+    print(f"part 1: {energy(moons)}")
 
-    positions = [
-        (-8, -10, 0),
-        (5, 5, 10),
-        (2, -7, 3),
-        (9, -8, -3)
-    ]
-    moons = Moons(positions)
-    steps = 0
+    moons = [Moon(m) for m in moons_coord]
+    x_states, y_states, z_states = set(), set(), set()
     while True:
-        moons.set_velocity()
-        moons.update_position()
-#        print(moons.to_str())
-        if moons.to_str() in moons.cache:
-            print(f"done in {steps}")
+        for moon in moons:
+            for other_moon in moons:
+                for i in range(3):
+                    if moon.pos[i] < other_moon.pos[i]:
+                        moon.vel[i] += 1
+                    elif moon.pos[i] > other_moon.pos[i]:
+                        moon.vel[i] += -1
+        for moon in moons:
+            for i in range(3):
+                moon.pos[i] += moon.vel[i]
+        x_state = tuple((m.pos[0], m.vel[0]) for m in moons)
+        y_state = tuple((m.pos[1], m.vel[1]) for m in moons)
+        z_state = tuple((m.pos[2], m.vel[2]) for m in moons)
+        if x_state in x_states and y_state in y_states and z_state in z_states:
             break
-        steps += 1
-        moons.cache += [moons.to_str()]
-        if (steps % 10000) == 0:
-            print(steps)
+        x_states.add(x_state)
+        y_states.add(y_state)
+        z_states.add(z_state)
+    print(f"part 2: {lcm(len(x_states), lcm(len(y_states), len(z_states)))}")
