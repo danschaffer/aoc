@@ -13,7 +13,6 @@ class Oxygen:
         self.moves = 0
 
     def do_move(self, move):
-        import pdb; pdb.set_trace()
         if move == 'n':
             inputs = [1]
             dest = (self.pos[0], self.pos[1] - 1)
@@ -61,7 +60,6 @@ class Oxygen:
             if output == [0]:
                 self.screen[dest] = 1
             elif output == [1]:
-                import pdb; pdb.set_trace()
                 self.screen[dest] = 0
                 moves += [move]
                 self.do_move(opp)
@@ -174,6 +172,6 @@ if __name__ == '__main__':
     game = Oxygen(data[:])
     if os.path.exists('./day15.pickle'):
         game.load()
-    game.run_auto()
-#    while True:
-#        game.run_manual()
+    #game.run_auto()
+    while True:
+        game.run_manual()
