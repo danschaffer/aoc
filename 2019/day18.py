@@ -1,221 +1,116 @@
 #!/usr/bin/env python
-import re
+
+import heapq
+import sys
 import time
-class Vault:
-    def __init__(self, text):
-        self.keys = []
-        self.key_locations = {}
-        self.map = {}
-        self.paths = {}
-        self.cache = []
-        self.parse_map(text.strip())
-        self.longest = 0
-        self.start = time.time()
 
-    def parse_map(self, text):
-        y = 0
-        for line in text.split('\n'):
-            x = 0
-            for item in list(line):
-                if re.search('[A-Za-z.@]', item):
-                    self.map[(x,y)] = item
-                x += 1
-            y += 1
+def read_map(data):
+    grid = set()
+    starts = []
+    keys = {}
+    doors = {}
+    for y, line in enumerate(data.strip().split('\n')):
+        for x, char in enumerate(line):
+            if char == '@':
+                starts.append((x,y))
+                grid.add((x,y))
+            elif char == '.':
+                grid.add((x,y))
+            elif char >= 'a' and char <= 'z':
+                keys[(x,y)] = char
+                grid.add((x,y))
+            elif char >= 'A' and char <= 'Z':
+                doors[(x,y)] = char
+                grid.add((x,y))
+    return grid, starts, keys, doors
 
-    def run(self):
-        current = '@'
-        keys = self.find_keys()
-        self.map_all_keys()
-        self.cache = {}
-        best = self.find_best([current], keys)
-        return best
+def solve(data):
+    start0 = time.time()
+    grid, start_positions, keys, doors=read_map(data)
+    total_keys = len(keys)
+    frontier = []
+    best1 = sys.maxsize
+    best2 = 0
+    heapq.heappush(frontier,(0, (start_positions, 0, [], keys, doors)))
+    best = sys.maxsize
+    best1 = sys.maxsize
+    cache = {}
+    while frontier:
+        _, (positions, moves_len, keys_have, keys, doors) = heapq.heappop(frontier)
+        for position in positions:
+            moves = bfs_keys(grid, position, keys, doors)
+            while moves:
+                _, (new_position, key_found, num_moves) = heapq.heappop(moves)
+                new_moveslen = moves_len + num_moves
+                new_keys_have = sorted(keys_have + [key_found])
+                new_doors = doors.copy()
+                for k in new_doors:
+                    if new_doors[k] == key_found.upper():
+                        del new_doors[k]
+                        break
+                new_keys = keys.copy()
+                for k in new_keys:
+                    if new_keys[k] == key_found:
+                        del new_keys[k]
+                        break
+                key1 = f"{new_position}{''.join(new_keys_have)}"
+                if len(new_keys_have) == total_keys:
+                    best1 = new_moveslen
+                    if best1 < best:
+                        best = best1
+                elif key1 not in cache or new_moveslen < cache[key1]:
+                    cache[key1] = new_moveslen
+                    new_positions = positions[:]
+                    new_positions.remove(position)
+                    new_positions += [new_position]
+                    heapq.heappush(frontier, (new_moveslen + 30 * (total_keys - len(new_keys_have)), (new_positions, new_moveslen, new_keys_have, new_keys, new_doors)))
+    return best
 
-    def find_keys(self):
-        if self.keys == []:
-            keys = []
-            for point in self.map:
-                if self.is_key(self.map[point]):
-                    keys += [self.map[point]]
-            self.keys = list(sorted(keys))
-        return self.keys
-
-    def is_key(self, object):
-        return not re.search('[a-z]', object) is None
-
-    def is_door(self, object):
-        return not re.search('[A-Z]', object) is None
-
-    def map_all_keys(self):
-        self.paths = {}
-        keys = self.find_keys() + ['@']
-        print(f"looking for paths for {len(keys)}")
-        for k1 in keys:
-            start = time.time()
-            self.paths[k1] = {}
-            for k2 in keys:
-                if k1 == k2:
-                    continue
-                self.paths[k1][k2] = self.find_path(self.find_location(k1), self.find_location(k2))
-            print(f"found path {k1} = {round(time.time()-start, 1)}s")
-
-    def get_time(self):
-        secs = int(time.time() - self.start)
-        hours = secs // 3600
-        mins = ( secs % 3600 ) // 60
-        secs = secs % 60
-        result = ""
-        if hours > 0:
-            result += f"{hours}h"
-        if mins > 0:
-            result += f"{mins}m"
-        result += f"{secs}s"
-        return result
-
-    def find_location(self, object):
-        if object in self.key_locations:
-            return self.key_locations[object]
-        for pos in self.map:
-            if self.map[pos] == object:
-                self.key_locations[object] = pos
-                return pos
-
-    def get_cache(self, current, keys):
-        key = ''.join([current] + keys)
-        hit = self.cache.get(key, None)
-        return hit
-
-    def set_cache(self, current, keys, result, bestmoves):
-        key = ''.join([current] + keys)
-        if len(key) > self.longest or len(key) >= len(self.keys) + 1:
-            print(f"{len(key)}:{bestmoves} = {result} {self.get_time()} {len(self.cache.keys())}")
-            self.longest = len(key)
-        self.cache[key] = result
-
-    def build_path(self, keys):
-        moves = []
-        for n in range(1, len(keys)):
-            moves += self.paths[keys[n-1]][keys[n]]['moves']
-        return moves
-
-    def valid_path(self, moves):
-        keys = []
-        for move in moves:
-            object = self.map[move]
-            if self.is_key(object):
-                keys += [object]
-            if self.is_door(object) and object.lower() not in keys:
-                return False
-        return True
-
-    def find_path(self, start, goal):
-        paths = [{'loc': start, 'moves': [], 'doors': []}]
-        cache = []
-        doors = []
-        while len(paths) > 0:
-            move = paths[0]
-            paths.remove(paths[0])
-            if move['loc'] == goal:
-                return move
-            if self.is_door(self.map[move['loc']]):
-                move['doors'] = move['doors'][:] + [self.map[move['loc']].lower()]
-            cache += [move['loc']]
-            moves = self.add_moves(move)
-            for move in moves:
-                if move['loc'] not in cache:
-                    paths = paths[:] + [move]
-            paths.sort(key=lambda move: len(move['moves']))
-
-    def add_if_valid(self, position):
-        if position['loc'] in self.map:
-            return [position]
-        return []
-
-    def add_moves(self, position):
-        moves = [] + \
-        self.add_if_valid({'loc': (position['loc'][0] - 1, position['loc'][1]), 'moves': position['moves'] + [(position['loc'][0] - 1, position['loc'][1])], 'doors': position['doors']}) +\
-        self.add_if_valid({'loc': (position['loc'][0] + 1, position['loc'][1]), 'moves': position['moves'] + [(position['loc'][0] + 1, position['loc'][1])], 'doors': position['doors']}) +\
-        self.add_if_valid({'loc': (position['loc'][0], position['loc'][1] - 1), 'moves': position['moves'] + [(position['loc'][0], position['loc'][1] - 1)], 'doors': position['doors']}) +\
-        self.add_if_valid({'loc': (position['loc'][0], position['loc'][1] + 1), 'moves': position['moves'] + [(position['loc'][0], position['loc'][1] + 1)], 'doors': position['doors']})
-        return moves
-
-    def find_best(self, moves, keys):
-        if len(keys) == 0:
-            return 0
-        current = moves[-1]
-        cached = self.get_cache(current, keys)
-        if cached:
-            return cached
-        best = 99999999
-        for key in keys:
-            moves1 = moves[:] + [key]
-            if not self.valid_path(self.build_path(moves1)):
+def bfs_keys(grid, start_position, keys, doors):
+    moves = []
+    frontier = []
+    heapq.heappush(frontier, (0, start_position))
+    visited = set()
+    while frontier:
+        num_moves, position = heapq.heappop(frontier)
+        visited.add(position)
+        x, y = position
+        for next_position in [(x-1,y), (x+1,y), (x,y-1), (x,y+1)]:
+            if next_position not in grid or next_position in doors or next_position in visited:
                 continue
-            keys0 = keys[:]
-            keys0.remove(key)
-            newlen = self.find_best(moves1, keys0) + len(self.paths[current][key]['moves'])
-            if newlen < best:
-                best = newlen
-                bestmoves = moves1
-            self.set_cache(current, keys, best, bestmoves)
-        return best
+            elif next_position in keys:
+                heapq.heappush(moves, (num_moves+1, (next_position, keys[next_position], num_moves+1)))
+            else:
+                heapq.heappush(frontier, (num_moves+1, next_position))
+    return moves
 
-
-def test_1():
-    vault = Vault("""
+# 8
+input1 = '''
 #########
 #b.A.@.a#
 #########
-""")
-    assert vault.is_door('@') is False
-    assert vault.is_key('@') is False
-    assert vault.find_location('@') == (5, 1)
-    assert vault.find_location('a') == (7, 1)
-    path = vault.find_path(vault.find_location('@'), vault.find_location('a'))
-    assert path['doors'] == []
-    assert path['moves'] == [(6,1), (7,1)]
-    path = vault.find_path(vault.find_location('@'), vault.find_location('b'))
-    assert path['doors'] == ['a']
-    assert path['moves'] == [(4,1), (3,1), (2,1), (1,1)]
-    assert vault.find_keys() == ['a', 'b']
-    assert vault.run() == 8
+'''
 
-def test_2():
-    vault = Vault("""
+# 86
+input2 = '''
 ########################
 #f.D.E.e.C.b.A.@.a.B.c.#
 ######################.#
 #d.....................#
 ########################
-""")
-    result = vault.run()
-    assert result == 86
+'''
 
-
-def test_3():
-    vault = Vault("""
+# 132
+input3 = '''
 ########################
 #...............b.C.D.f#
 #.######################
 #.....@.a.B.c.d.A.e.F.g#
 ########################
-""")
-    result = vault.run()
-    assert result == 132
+'''
 
-def test_4():
-    vault = Vault("""
-########################
-#@..............ac.GI.b#
-###d#e#f################
-###A#B#C################
-###g#h#i################
-########################
-""")
-    result = vault.run()
-    assert result == 81
-
-def test_5():
-    vault = Vault("""
+# 136
+input4 = '''
 #################
 #i.G..c...e..H.p#
 ########.########
@@ -225,13 +120,77 @@ def test_5():
 ########.########
 #l.F..d...h..C.m#
 #################
-""")
-    result = vault.run()
-    assert result == 136
+'''
 
+# 81
+input5 = '''
+########################
+#@..............ac.GI.b#
+###d#e#f################
+###A#B#C################
+###g#h#i################
+########################
+'''
 
-if __name__ == '__main__':
-    vault = Vault("""
+# 14
+input6 = '''
+###########
+###...#####
+###.@.#####
+###......a#
+###A#b#####
+##cB#Cd####
+###########
+'''
+
+# 8
+input7 = '''
+#######
+#a.#Cd#
+##@#@##
+#######
+##@#@##
+#cB#Ab#
+#######
+'''
+
+# 24
+input8 = '''
+###############
+#d.ABC.#.....a#
+######@#@######
+###############
+######@#@######
+#b.....#.....c#
+###############
+'''
+
+# 32
+input9 = '''
+#############
+#DcBa.#.GhKl#
+#.###@#@#I###
+#e#d#####j#k#
+###C#@#@###J#
+#fEbA.#.FgHi#
+#############
+'''
+
+# 72
+input10 = '''
+#############
+#g#f.D#..h#l#
+#F###e#E###.#
+#dCba@#@BcIJ#
+#############
+#nK.L@#@G...#
+#M###N#H###.#
+#o#m..#i#jk.#
+#############
+'''
+
+# 3586
+actual1 = '''
 #################################################################################
 #..f....#...........#.....#.........#m..#.........#.#.......#...............#...#
 #.#.###.#########.#.#.###.#.#.#####.#.#.#Q#.#####.#.#.###.###.#V#####.#####.#.#C#
@@ -312,6 +271,120 @@ if __name__ == '__main__':
 #...#.....#...#...#...#...#...#...#.#.#.#...#.#...#...#...#.#.#...#.#...#.#.#.#.#
 ###.#####.###.#.#.###########.###.#.#.#.#.#.#.#.###.###.###.#.#####.#F#####.#.#.#
 #.......#.......#.............#...#.....#.#...#.........#.....#.............#i..#
-#################################################################################""")
-    result = vault.run()
-    print(result)  # 3586  16h
+#################################################################################
+'''
+
+# 1974
+actual2 = '''
+#################################################################################
+#..f....#...........#.....#.........#m..#.........#.#.......#...............#...#
+#.#.###.#########.#.#.###.#.#.#####.#.#.#Q#.#####.#.#.###.###.#V#####.#####.#.#C#
+#.#...#...........#t#.#.#...#.#...#.#.#.#.#.#.......#.#.#.....#.....#.#...#...#.#
+#####.###############.#.#####.#.#.###.#.#.#.#########.#.###########.###.#.#####.#
+#.....#...............#...#.#...#...#.#.#.#.........#.#...........#.....#.#...#e#
+#.###.#.###############.#.#.#######.#I#.#.#########.#.###########.#####.#.#.#.#.#
+#...#.#...#.....#.......#.....#.G.#.#.#.#.#.......#.#.....#.......#...#.#...#.#.#
+###.#.###.#.#.#.###.###########.#.#.#.#.#.#####.#.#.#####.#.#.#####.#.#######.#.#
+#...#.#...#.#.#...#.#...#.....#b#.#...#.#.......#.#.........#.#.....#.#...#...#.#
+#.#####.###.#.###.#.#.#.#.###.#.#.#####.#########.#############.#####.#.#.#.###.#
+#.......#.#.#...#.Z.#.#.B.#.....#.....#.#.......#.....#.........#.#.....#...#...#
+#.#######.#.###.#####.#.#############.#M#.#.#########.#.#########.#.#############
+#.#.......#...#.#.....#u#...K.......#.#.#.#...........#...#.........#...........#
+#.###.###.#.###.#.#####.#.#####.###.#.#.#.#############.#.#.#########.#########.#
+#...#...#...#...#.U.#...#.#..j#...#.#g..#.......#...R.#.#.#.....#.....#.......#.#
+###.#######.#.#####.#####.#.#.###.#.#############.###.#.#.#######.#########.###.#
+#.#.......#.#.....#..k....#.#.#d..#.#...#.........#...#.#.........#.#.......#...#
+#.#######.#.#####.#####.###.#.#####.#.#.#.#########.###.#########.#.#.#.#####.#.#
+#.....#...#.#.....#.H.#.#...#.S...#.D.#.#...#.....#.#...#.#.....#.#...#..a#...#.#
+#.#.#.#.#####.#####.#.#.#.#######.#####.###.#.###.#.###.#.#.###.#.#.#####.#.###.#
+#.#.#.#...#...#...#.#.#.#.#.....#.....#s#...#...#.#...#...#...#.#.#...#...#.#...#
+###.#.###.#.###.#.#.#####J###.#######.#.#.#######.###.###.#####.#.#.###.#.#.#.###
+#...#.#...#.#...#.#.#.....#...#.....#...#.#...#.....#.#...#...#.#.#.#...#.#.#...#
+#.#####.###.#.###.#.###.###.###.#.#.#####.#.#.#.###.#.###.###.#.#.###.###.#.###.#
+#.....#...#...#...#....h#...#...#.#.#...#...#.#.#.#.#...#.....#.#.....#...#.#.#.#
+#.###.###.#.###.###########.#.###.#.###.#####.#.#.#.###.#######.#######.###.#.#.#
+#.#.#.....#.#...#.....#...#...#.#.#.....#...#...#...#.#...#.....#.......#.#.#..p#
+#.#.#########.###.#.#.#.#.###.#.#.#####.#.#######.###.###.#.###########.#.#.###.#
+#.#.#.......#.....#.#...#...#...#.#...#.#.......#.#.#...#.#.......#...#.#.#...#.#
+#.#.#.###.#.#.#####.#######.#####.###.#.#.#####.#.#.#.#.#.#######.#.#.#.#.###.#.#
+#.#...#...#.#.....#.......#.....#...#...#.....#.#.#...#.#...#...#...#.#.#.#...#.#
+#.#####.###.#####.#######.#####.###.#.###.#####.#.#####.#.###.#.#####.#.#.#.###.#
+#...N.#.#.#.#.....#.......#...#.....#.#.#.#...#.#.......#.....#.......#...#...#.#
+#####.#.#.#.#.#####.#######.#########.#.###.#.#.#######.#####################.#.#
+#...#...#...#.....#.......#.#...#.....#.#...#.....#...X.#.....Y.#...#...W.....#.#
+###.#####.#######.#######.#.#.#.#.#####.#.#########.#########.#.###.#.#.#######.#
+#...#.....#...#.....#...#.#.#.#...#.....#.#.....#...#...#...#.#...#...#.#.#.....#
+#.###.#####.#.#######.#.#.#.#.#######.#.#.#.###.#.###.#.#.#.#.###.#####.#.#.#####
+#.........A.#.........#...#..x........#@#@....#.......#...#...#.........#.......#
+#################################################################################
+#.O.......#.............#.......#......@#@............#...........#...#...#.#...#
+###.#####.#######.#####.###.#.#.#.#####.#.#.#########.#######.###.#.#.#.#.#.#.#.#
+#...#...#.......#.#..y....#.#.#.#.#...#.#.#.#.....#.........#...#.#.#...#.#.#.#.#
+#.#####.#######.#.#.#####.###.#.#.#.#.#.###.#.###.#########.###.#.#.#####.#.#.#.#
+#.#...#.......#.#.#.#...#.....#...#.#.#.#...#...#...#.....#.....#.#...#.#.#...#.#
+#.#.#.#####.###.#.###.#.#############.#.#.#####.###.#.###.#######.###.#.#.#####.#
+#..r#.#...#.....#.#.L.#.#...#...#.....#.#.........#.#.#...#.....#.....#.#.#..n..#
+#####.#.#.###.###.#.###.#.#.#.#.###.###.#.#######.#.#.#.###.###.#######.#.#.#####
+#...#...#...#..w..#.#.#.#.#.#.#...#...#.#...#...#.#...#...#.#...#.....#...#.....#
+#.#.#######.#######.#.#.#.#.#.###.###.#.###.#.#.#######.#.#.#.#####.###.###.###.#
+#.#...#...#.....#...#.#...#.....#...#.#.#.#.#.#.......#.#...#.#...#.#...#...#...#
+###.#.#.#######.#.###.#########.###.#.#.#.#.#.#######.#.#####.#.#.#.#.#####.#.###
+#...#...#...#.P.#.#...#.#.....#.#...#.#.#...#.#.#...#.#...#o#...#.#...#...#.#...#
+#.#####.#.#.#.###.#.#.#.#.###.###.###.#.#.###.#.#.#.#.###.#.#####.#.###.#.#.###.#
+#.....#.#.#.#.....#.#...#...#.....#...#.#...#.#...#.#.#.....#.....#.#...#.#...#.#
+#.###.#.#.#.#######.#######.#########.#.#####.#.###.#.#.#####.#####.#.###.#.###.#
+#.#.#.#.#.#...#.#.....#.....#...#...#.#.#.....#.#.#.#.#.#.....#...#.#...#.#.#...#
+#.#.#.###.#.#.#.#.###.#.#####.#.#.#.#.#.#.#####.#.#.#.###.#####.###.###.#.###.###
+#.#.#.E...#.#.#...#...#...#...#...#...#.#.....#.#.#.......#.........#..l#...#...#
+#.#.#######.#.#####.###.#.#.#.#####.###.#####.#.#.#########.###.#####.#####.###.#
+#.#.......#.#.....#.#.#.#.#.#.#...#.#...#.....#.#.#.....#...#.#.#...#.#...#.....#
+#.#.#####.#.#####.#.#.#.#.###.#.#.###.###.#####.#.#.###.#####.#.#.#.#.###.#####.#
+#.#.#.....#.#.......#.#.#.#...#.#.#...#.#.#.....#.#.#.#.....#.#...#...#...#.....#
+#.#.#.#####.#.#######.#.#.#.###.#.#.###.#.#.#####.#.#.#####.#.#########.###.#####
+#.#.#...#...#.#..q#...#.#.#.....#.#.#...#.#.#.....#.#.....#.#.......#...#...#...#
+#.#.#.###.###.#.#.#.#####.#.#####.#.###.#.#.#.#.###.###.#.#.#######.#.#.#.#####.#
+#.#.#.#...#.#...#.#.......#.....#.#...#.#.#...#.#v..#...#.#...#.....#.#.#.#...#.#
+#.#.#.#.###.#.#################.#.###.#.#.###.###.###.#######.#.#####.###.#.#.#.#
+#...#.#...#...#.............#...#...#.#.#...#.#...#.........#...#.......#...#...#
+#.#####.#.#####.#.###########.#####.#.#.#.#.###.###########.#####.#####.#######.#
+#.#...#.#.#.....#.....#.......#.....#.#.#.#...#.#...............#.#...#.......#.#
+###.#.###.#.#########.#.#######.#####.#.#.###.#.#.#.#############.###.#####.###.#
+#...#...#.#.#.........#.#.....#.....#.#.#.#...#.#.#....c..........#.....#.#.....#
+#.#####.#.#.#.#########.#.#.#.#####.#.#.###.###.#.#################.###.#.#######
+#.....#...#z#.......#...#.#.#...#.#.#.#.#...#...#.....#.....#...#...#.#.#.......#
+#.###.#####.#######.#.###.#.###.#.#.#.#.#.###.#######.###.#.#.#.#.###.#.#T#.###.#
+#...#.....#...#...#...#...#...#...#.#.#.#...#.#...#...#...#.#.#...#.#...#.#.#.#.#
+###.#####.###.#.#.###########.###.#.#.#.#.#.#.#.###.###.###.#.#####.#F#####.#.#.#
+#.......#.......#.............#...#.....#.#...#.........#.....#.............#i..#
+#################################################################################
+'''
+
+
+if __name__ == '__main__':
+#    print(f"day 18 part 1: {solve(actual1)}")
+    print(f"day 18 part 2: {solve(actual2)}")
+
+
+def test1():
+    grid, start_position, keys, doors=read_map(input1)
+    keys_have = []
+    moves = bfs_keys(grid, start_position[0], keys, doors)
+    assert moves == [(2, ((7,1), 'a', 2))]
+
+def test2():
+    assert solve(input1) == 8
+    assert solve(input2) == 86
+    assert solve(input3) == 132
+    assert solve(input4) == 136
+    assert solve(input5) == 81
+    assert solve(input6) == 25
+
+def test3():
+    assert solve(input7) == 8
+    assert solve(input8) == 24
+    assert solve(input9) == 32
+    assert solve(input10) == 74
+
+def test4():
+    assert solve(actual1) == 3586
+    assert solve(actual2) == 1974
