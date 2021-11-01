@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from queue import PriorityQueue
 
 class Day23:
     def __init__(self, file):
@@ -23,10 +24,31 @@ class Day23:
                 result += 1
         return result  
 
+    def run_part2(self):
+        q = PriorityQueue()
+        for x,y,z,r in self.data:
+            d = abs(x) + abs(y) + abs(z)
+            q.put((max(0, d - r),1))
+            q.put((d + r + 1, -1))
+        count = 0
+        maxCount = 0
+        result = 0
+        while not q.empty():
+            dist, e = q.get()
+            count += e
+            if count > maxCount:
+                result = dist
+                maxCount = count
+        return result
+
 def test1():
     assert Day23('day23-test.input').run_part1() == 7
-    assert Day23('day23.input').run_part1() == 721
+    day23 = Day23('day23.input')
+    day23.run_part1() == 712
+    day23.run_part2() == 93130765
+
 
 if __name__ == '__main__':
     print("advent of code: day23")
     print(f"part 1: {Day23('day23.input').run_part1()}")
+    print(f"part 2: {Day23('day23.input').run_part2()}")
