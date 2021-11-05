@@ -1,8 +1,13 @@
 #!/usr/bin/env python
 import re
+import networkx as nx
 class DonutMaze:
-    def __init__(self, maze_name):
+    def __init__(self, maze_name, part2=False):
+        self.W = 0
+        self.H = 0
+        self.part2=part2
         self.map = {}
+        self.graph = nx.Graph()
         self.routes = {}
         self.route_names = {}
         self.start = None
@@ -12,8 +17,6 @@ class DonutMaze:
 
     def get_neighbors(self, node):
         neighbors = []
-        if node in self.routes:
-            neighbors += [self.routes[node]]
         x = node[0]
         y = node[1]
         for point in [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]:
@@ -21,25 +24,47 @@ class DonutMaze:
                 neighbors += [point]
         return neighbors
 
-    def solve_dijkstra(self):
+    def solve(self):
+        if self.part2:
+            return self.solve_part2()
+        else:
+            return self.solve_part1()
+
+    def solve_part1(self):
         nodes = {}
         for node in self.get_nodes():
-            if node == self.start:
-                nodes[node] = {'loc': node, 'distance': 0, 'visited': False}
-            else:
-                nodes[node] = {'loc': node, 'distance': -1, 'visited': False}
-        frontier = [self.start]
-        while len(frontier) > 0:
-            current = frontier[0]
-            frontier.remove(current)
-            nodes[current]['visited'] = True
-            neighbors = self.get_neighbors(current)
-            for neighbor in neighbors:
-                if not nodes[neighbor]['visited']:
-                    frontier += [neighbor]
-                    nodes[neighbor]['visited'] = True
-                    nodes[neighbor]['distance'] = nodes[current]['distance'] + 1
-        return nodes[self.end]['distance']
+            self.graph.add_node(node)
+            for neighbor in self.get_neighbors(node):
+                self.graph.add_edge(node, neighbor)
+            if node in self.routes:
+                self.graph.add_edge(node, self.routes[node])
+        answer = nx.shortest_path_length(self.graph, self.start, self.end)
+        return answer
+
+    def solve_part2(self):
+        nodes = {}
+        for level in range(30):
+            for node in self.get_nodes():
+                if level != 0 and node in [self.start, self.end]:
+                    continue
+                node1=(node[0],node[1],level)
+                self.graph.add_node(node1)
+                for neighbor in self.get_neighbors(node):
+                    neighbor1 = (neighbor[0],neighbor[1],level)
+                    self.graph.add_edge(node1, neighbor1)
+                if node in self.routes:
+                    dest = self.routes[node]
+                    dest1 = (dest[0],dest[1],level+1)
+                    if node[0] <= 4 or node[0] >= self.W - 4 or node[1] <= 4 or node[1] >= self.H - 4:
+                        self.graph.add_edge(node1,(dest[0],dest[1],level-1))
+                    else:
+                        self.graph.add_edge(node1,(dest[0],dest[1],level+1))
+        start = (self.start[0], self.start[1], 0)
+        end = (self.end[0], self.end[1], 0)
+#        for i,path in enumerate(nx.shortest_path(self.graph, start, end)):
+#            print(f"{i} {path}")
+        answer = nx.shortest_path_length(self.graph, start, end)
+        return answer
 
     def get_nodes(self):
         nodes = []
@@ -109,14 +134,16 @@ class DonutMaze:
 
     def load_map(self, maze_name):
         map_str = self.get_maze(maze_name)
-        y = 0
-        for line in  map_str.split('\n'):
-            x = 0
+        y = 1
+        for line in map_str.split('\n'):
+            self.W = max(self.W, len(line.strip()))
+            x = 1
             for item in list(line):
                 if self.is_route(item) or self.is_path(item):
                     self.map[(x,y)] = item
                 x += 1
             y += 1
+        self.H = y
 
     def get_maze(self, name):
         mazes = {
@@ -300,22 +327,66 @@ YL......#...#.#.#...#...#.....#                                                 
   #.....#.......#.............#...........#...#.......#...#.......#.#.......#...#.#.....#...............#.#.........#
   #################################.###.###.#.#######.###.#######.###########.#####.#################################
                                    A   U   Z M       S   P       U           J     O
-                                   A   X   Z V       C   S       I           Q     Y         """
+                                   A   X   Z V       C   S       I           Q     Y         """,
+"maze4": """
+             Z L X W       C                 
+             Z P Q B       K                 
+  ###########.#.#.#.#######.###############  
+  #...#.......#.#.......#.#.......#.#.#...#  
+  ###.#.#.#.#.#.#.#.###.#.#.#######.#.#.###  
+  #.#...#.#.#...#.#.#...#...#...#.#.......#  
+  #.###.#######.###.###.#.###.###.#.#######  
+  #...#.......#.#...#...#.............#...#  
+  #.#########.#######.#.#######.#######.###  
+  #...#.#    F       R I       Z    #.#.#.#  
+  #.###.#    D       E C       H    #.#.#.#  
+  #.#...#                           #...#.#  
+  #.###.#                           #.###.#  
+  #.#....OA                       WB..#.#..ZH
+  #.###.#                           #.#.#.#  
+CJ......#                           #.....#  
+  #######                           #######  
+  #.#....CK                         #......IC
+  #.###.#                           #.###.#  
+  #.....#                           #...#.#  
+  ###.###                           #.#.#.#  
+XF....#.#                         RF..#.#.#  
+  #####.#                           #######  
+  #......CJ                       NM..#...#  
+  ###.#.#                           #.###.#  
+RE....#.#                           #......RF
+  ###.###        X   X       L      #.#.#.#  
+  #.....#        F   Q       P      #.#.#.#  
+  ###.###########.###.#######.#########.###  
+  #.....#...#.....#.......#...#.....#.#...#  
+  #####.#.###.#######.#######.###.###.#.#.#  
+  #.......#.......#.#.#.#.#...#...#...#.#.#  
+  #####.###.#####.#.#.#.#.###.###.#.###.###  
+  #.......#.....#.#...#...............#...#  
+  #############.#.#.###.###################  
+               A O F   N                     
+               A A D   M                     
+"""
         }
         return mazes[name]
 
 def test_maze1():
     donutmaze = DonutMaze('maze1')
-    assert donutmaze.solve_dijkstra() == 23
+    assert donutmaze.solve() == 23
+    donutmaze = DonutMaze('maze2')
+    assert donutmaze.solve() == 58
+    donutmaze = DonutMaze('maze3')
+    steps = donutmaze.solve() == 526
 
 def test_maze2():
-    donutmaze = DonutMaze('maze2')
-    assert donutmaze.solve_dijkstra() == 58
-
-def test_maze3():
     donutmaze = DonutMaze('maze3')
-    steps = donutmaze.solve_dijkstra() == 526
+    steps = donutmaze.solve(part2=True) == 6292
+    donutmaze = DonutMaze('maze4')
+    steps = donutmaze.solve(part2=True) == 396
+
 
 if __name__ == '__main__':
     donutmaze = DonutMaze('maze3')
-    print(f"part 1: {donutmaze.solve_dijkstra()}")
+    print(f"part 1: {donutmaze.solve()}")
+    donutmaze = DonutMaze('maze3', part2=True)
+    print(f"part 0: {donutmaze.solve()}")
