@@ -6,10 +6,10 @@ https://adventofcode.com
 Here are my solutions to advent of code.  I have used python for all
 solutions.
 
-total: 287
+total: 288
 
 - 2020 50 points, needed lots of help on about 5 problems
-- 2019 47 points, completed all 1 stars, didn't get 3 of the 2 stars
+- 2019 48 points, needed help of several solutions
 - 2018 40 points, in progress
 - 2017 50 points, completed all solutions in Feb 2021
 - 2016 50 points, completed all solutions in Feb 2021
