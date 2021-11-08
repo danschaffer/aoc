@@ -10,7 +10,7 @@ total: 290
 
 - 2020 50 points, needed lots of help on about 5 problems
 - 2019 50 points, needed help of several solutions, trouble with 20,22,24, Nov 2021
-- 2018 40 points, in progress
+- 2018 42 points, in progress, struggling with 15,21,22,24
 - 2017 50 points, completed all solutions in Feb 2021
 - 2016 50 points, completed all solutions in Feb 2021
 - 2015 50 points, completed all solutions in Nov 2020
