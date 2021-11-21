@@ -1,81 +1,62 @@
 #!/usr/bin/env python3
-
 import networkx as nx
+
 class Day22:
-    def __init__(self, depth, target_x, target_y):
+    def __init__(self, depth, target, corner):
         self.depth = depth
-        self.target_x = target_x
-        self.target_y = target_y
-        self.table = {}
+        self.target = target
+        self.corner = corner
+        self.grid = {}
 
-    def print_board(self):
-        for y in range(self.target_y+1):
-            line = ''
-            for x in range(self.target_x+1):
-                line += ['.','=','|'][self.table[(x,y)]%3]
-            print(line)
-        print('')
-
-    def run_part1(self):
-        answer = 0
-        for x in range(self.target_x+1):
-            for y in range(self.target_y+1):
-                if x == 0:
-                    geo_index = y * 48271
+    def generate_grid(self):
+        for y in range(0, self.corner[1] + 1):
+            for x in range(0, self.corner[0] + 1):
+                if (x, y) in [(0, 0), self.target]:
+                    geo = 0
+                elif x == 0:
+                    geo = y * 48271
                 elif y == 0:
-                    geo_index = x * 16807
-                elif (x,y) == (self.target_x, self.target_y):
-                    geo_index = 0
+                    geo = x * 16807
                 else:
-                    geo_index = self.table[(x-1,y)] * self.table[(x,y-1)]
-                erosion_level = (geo_index + self.depth) % 20183
-                self.table[(x,y)] = erosion_level
-                answer += erosion_level % 3
-        return answer
+                    geo = self.grid[(x-1, y)][1] * self.grid[(x, y-1)][1]
+                ero = (geo + self.depth) % 20183
+                risk = ero % 3
+                self.grid[(x, y)] = (geo, ero, risk)
 
-    def run_part2(self, x, y):
-        rocky, wet, narrow = 0,1,2
-        torch, gear, neither = 0,1,2
+    def dijkstra(self):
+        rocky, wet, narrow = 0, 1, 2
+        torch, gear, neither = 0, 1, 2
+        valid_items = {rocky: (torch, gear), wet: (gear, neither), narrow: (torch, neither)}
         graph = nx.Graph()
-        for x in range(x+1):
-            for y in range(y+1):
-                risk = self.table[(x,y)] % 3
-                if risk == rocky:
-                    graph.add_edge((x,y,torch),(x,y,gear),weight=7)
-                elif risk == wet:
-                    graph.add_edge((x,y,gear),(x,y,neither),weight=7)
-                else:
-                    graph.add_edge((x,y,torch),(x,y,neither),weight=7)
-                for dx, dy in ((0,1),(0,-1),(1,0),(-1,0)):
-                    newx,newy = x+dx, y+dy
-                    if newx < 0 or newx > x or newy < 0 or newy > y:
-                        continue
-                    risk = self.table[(newx,newy)] % 3
-                    if risk == rocky:
-                        graph.add_edge((x,y,gear), (newx,newy,gear),weight=1)
-                        graph.add_edge((x,y,torch), (newx,newy,torch),weight=1)
-                    elif risk == wet:
-                        graph.add_edge((x,y,gear), (newx,newy,gear),weight=1)
-                        graph.add_edge((x,y,neither), (newx,newy,neither),weight=1)
-                    else:
-                        graph.add_edge((x,y,torch), (newx,newy,torch),weight=1)
-                        graph.add_edge((x,y,neither), (newx,newy,neither),weight=1)
-        for i,path in enumerate(nx.dijkstra_path(graph,(0,0,torch),(x,y,torch))):
-            print(f"{i} {path}")
-        return nx.dijkstra_path_length(graph,(0,0,torch),(x,y,torch))
+        for y in range(0, self.corner[1] + 1):
+            for x in range(0, self.corner[0] + 1):
+                items = valid_items[self.grid[(x, y)][2]]
+                graph.add_edge((x, y, items[0]), (x, y, items[1]), weight=7)
+                for dx, dy in ((0, 1), (0, -1), (1, 0), (-1, 0)):
+                    new_x, new_y = x+dx, y+dy
+                    if 0 <= new_x <= self.corner[0] and 0 <= new_y <= self.corner[1]:
+                        new_items = valid_items[self.grid[(new_x, new_y)][2]]
+                        for item in set(items).intersection(set(new_items)):
+                            graph.add_edge((x, y, item), (new_x, new_y, item), weight=1)
+        return nx.dijkstra_path_length(graph, (0, 0, torch), (self.target[0], self.target[1], torch))
 
-    def get_distance(self, loc, goal):
-        return abs(loc[0] - goal[0]) + abs(loc[1] - goal[1])
+    def part1(self):
+        self.generate_grid()
+        return sum(v[2] for v in self.grid.values())
+
+    def part2(self):
+        self.generate_grid()
+        return self.dijkstra()
 
 def test1():
-    assert Day22(510,(10,10)).run_part1() == 114
+    assert Day22(510,(10,10),(10,10)).part1() == 114
+    assert Day22(7305,(13,734),(13,734)).part1() == 10204
 
 def test2():
-    assert Day22(7305,(13,734)).run_part1() == 10204
+    assert Day22(510,(10,10),(15,15)).part2() == 45
+    assert Day22(7305,(13,734),(25,1100)).part2() == 1004
 
 if __name__ == '__main__':
-    print("advent of code: day22")
-    d = Day22(7305,13,734)
-    print(f"part 1: {d.run_part1()}")
-    print(f"part 2: {d.run_part2(13,734)}")
-
+    print("advent of code day 22")
+    print(f"part 1: {Day22(7305,(13,734),(13,734)).part1()}")
+    print(f"part 2: {Day22(7305,(13,734),(25,1100)).part2()}")
