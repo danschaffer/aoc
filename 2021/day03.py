@@ -2,20 +2,15 @@
 
 class Day03:
     def __init__(self, file):
-        self.lines = []
-        self.data = []
-        for line in open(file).readlines():
-            self.length = len(line)
-            self.lines.append(line)
-            self.data.append(int(line,2))
+        self.lines = [line.strip() for line in open(file).readlines()]
+        self.data = [int(line,2) for line in self.lines]
+        self.length = len(self.lines[0])
 
     def run_part1(self):
         gamma = 0
         epsilon = 0
         for i in range(self.length):
-            count = 0
-            for j in range(len(self.data)):
-                count += self.data[j] >> i & 1
+            count = sum([j >> i & 1 for j in self.data])
             if count >= len(self.data) / 2:
                 gamma = gamma | 1 << i
             else:
@@ -25,38 +20,20 @@ class Day03:
     def run_part2(self):
         oxygen = self.data[:]
         co2 = self.data[:]
-        for i in range(self.length):
-            count = 0
-            oxygen2 = []
-            i0 = self.length - i - 1
-            for j in range(len(oxygen)):
-                count += oxygen[j] >> i0 & 1
+        for i in range(self.length-1,-1,-1):
+            count = sum([j >> i & 1 for j in oxygen])
             if count >= len(oxygen) / 2:
-                for j in range(len(oxygen)):
-                    if oxygen[j] >> i0 & 1 == 1:
-                        oxygen2.append(oxygen[j])
+                oxygen=[j for j in oxygen if j >> i & 1 == 1]
             else:
-                for j in range(len(oxygen)):
-                    if oxygen[j] >> i0 & 1 == 0:
-                        oxygen2.append(oxygen[j])
-            oxygen = oxygen2
+                oxygen=[j for j in oxygen if j >> i & 1 == 0]
             if len(oxygen) == 1:
                 break
-        for i in range(self.length):
-            count = 0
-            co22 = []
-            i0 = self.length - i - 1
-            for j in range(len(co2)):
-                count += co2[j] >> i0 & 1
+        for i in range(self.length-1,-1,-1):
+            count = sum([j >> i & 1 for j in co2])
             if count >= len(co2) / 2:
-                for j in range(len(co2)):
-                    if co2[j] >> i0 & 1 == 0:
-                        co22.append(co2[j])
+                co2 = [j for j in co2 if j >> i & 1 == 0]
             else:
-                for j in range(len(co2)):
-                    if co2[j] >> i0 & 1 == 1:
-                        co22.append(co2[j])
-            co2 = co22
+                co2 = [j for j in co2 if j >> i & 1 == 1]
             if len(co2) == 1:
                 break
         return oxygen[0] * co2[0]
