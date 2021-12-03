@@ -14,4 +14,4 @@ Total = 4
 
 - 0 stars: 
 - 1 stars: 
-- 2 stars: 1,2
+- 2 stars: 1,2,3
