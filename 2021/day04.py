@@ -38,7 +38,7 @@ class Day04:
             assert self.numbers
 
     def run_part2(self):
-        boards_won = []
+        boards_won = set()
         while True:
             number = self.numbers.pop(0)
             for n,board in enumerate(self.boards):
@@ -50,8 +50,7 @@ class Day04:
                     self.lines[f"{n}r{row}"] += 1
                     board[loc] = -1
                     if self.lines[f"{n}c{col}"] == 5 or self.lines[f"{n}r{row}"] == 5:
-                        if n not in boards_won:
-                            boards_won.append(n)
+                        boards_won.add(n)
                         if len(boards_won) == len(self.boards):
                             return sum([n0 for n0 in board if n0 > -1])*number
             assert self.numbers
