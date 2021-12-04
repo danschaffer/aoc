@@ -10,8 +10,8 @@ show timing:
 Status
 ======
 
-Total = 4
+Total = 8
 
 - 0 stars: 
 - 1 stars: 
-- 2 stars: 1,2,3
+- 2 stars: 1,2,3,4
