@@ -12,8 +12,10 @@ class Day1:
 
 def test1():
     assert Day1('day01-test.input').part1() == 7
-    assert Day1('day01.input').part1() == 1301
     assert Day1('day01-test.input').part2() == 5
+
+def test2():
+    assert Day1('day01.input').part1() == 1301
     assert Day1('day01.input').part2() == 1346
 
 if __name__ == '__main__':

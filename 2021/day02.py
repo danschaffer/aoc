@@ -41,6 +41,11 @@ def test1():
     assert test_day02.run_part1() == 150
     assert test_day02.run_part2() == 900
 
+def test2():
+    test_day02 = Day02('./day02.input')
+    assert test_day02.run_part1() == 1693300
+    assert test_day02.run_part2() == 1857958050
+
 if __name__ == '__main__':
     print("advent of code: day02")
     day02 = Day02('./day02.input')
