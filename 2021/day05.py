@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import math
 class Day05:
     def __init__(self, file, part2=False):
         self.data = {}
@@ -14,22 +14,12 @@ class Day05:
             x1,y1 = c1.split(',')
             x1 = int(x1)
             y1 = int(y1)
-            if x0 == x1 or y0 == y1:
-                if x0 > x1 or y0 > y1:
-                    x0, x1 = x1, x0
-                    y0, y1 = y1, y0
-                for x in range(x0,x1+1):
-                    for y in range(y0,y1+1):
-                        self.data[(x,y)] = self.data.get((x,y), 0) + 1
-            elif part2:
-                xoffset = yoffset = 1
-                if x0 > x1:
-                    xoffset = -1
-                if y0 > y1:
-                    yoffset = -1
-                for i in range(abs(x0-x1)+1):
-                    self.data[(x0+i*xoffset,y0+i*yoffset)] = self.data.get((x0+i*xoffset,y0+i*yoffset),0) + 1
-
+            segments = max(abs(x0-x1),abs(y0-y1))
+            slopex = (x1 - x0)//segments
+            slopey = (y1 - y0)//segments
+            if part2 or x0 == x1 or y0 == y1:
+                for i in range(segments+1):
+                    self.data[(x0+i*slopex, y0+i*slopey)] = self.data.get((x0+i*slopex,y0+i*slopey), 0) + 1
 
     def run(self):
         return sum([1 for c in self.data if self.data[c]>1])        
