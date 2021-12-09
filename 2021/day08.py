@@ -28,8 +28,7 @@ class Day08:
             numbers[7] = sorted_seeds[1]
             numbers[4] = sorted_seeds[2]
             numbers[8] = sorted_seeds[9]
-
-            if sorted_seeds[0] in sorted_seeds[3]:
+            if self.matches(sorted_seeds[3],sorted_seeds[0]) == 2:
                 numbers[3] = sorted_seeds[3]
                 if self.matches(sorted_seeds[4], sorted_seeds[2]) == 2:
                     numbers[2] = sorted_seeds[4]
@@ -37,7 +36,7 @@ class Day08:
                 else:
                     numbers[2] = sorted_seeds[5]
                     numbers[5] = sorted_seeds[4]
-            elif sorted_seeds[0] in sorted_seeds[4]:
+            elif self.matches(sorted_seeds[4],sorted_seeds[0]) == 2:
                 numbers[3] = sorted_seeds[4]
                 if self.matches(sorted_seeds[3], sorted_seeds[2]) == 2:
                     numbers[2] = sorted_seeds[3]
@@ -54,13 +53,30 @@ class Day08:
                     numbers[2] = sorted_seeds[4]
                     numbers[5] = sorted_seeds[3]
 
-            if sorted_seeds[1] not in sorted_seeds[6]:
+            if self.matches(sorted_seeds[6], sorted_seeds[0]) != 2:
                 numbers[6] = sorted_seeds[6]
-            elif sorted_seeds[1] not in sorted_seeds[7]:
+                if self.matches(sorted_seeds[7], numbers[5]) == 5:
+                    numbers[9] = sorted_seeds[7]
+                    numbers[0] = sorted_seeds[8]
+                else:
+                    numbers[9] = sorted_seeds[8]
+                    numbers[0] = sorted_seeds[7]
+            elif self.matches(sorted_seeds[7], sorted_seeds[0]) != 2:
                 numbers[6] = sorted_seeds[7]
+                if self.matches(sorted_seeds[6], numbers[5]) == 5:
+                    numbers[9] = sorted_seeds[6]
+                    numbers[0] = sorted_seeds[8]
+                else:
+                    numbers[9] = sorted_seeds[8]
+                    numbers[0] = sorted_seeds[6]
             else:
                 numbers[6] = sorted_seeds[8]
-
+                if self.matches(sorted_seeds[7], numbers[5]) == 5:
+                    numbers[9] = sorted_seeds[7]
+                    numbers[0] = sorted_seeds[6]
+                else:
+                    numbers[9] = sorted_seeds[6]
+                    numbers[0] = sorted_seeds[7]
             number_key = {}
             for i in range(10):
                 number_key[numbers[i]] = i
@@ -68,6 +84,7 @@ class Day08:
             for n in range(4):
                 number += number_key[sorted_output[n]] * 10**(3-n)
             answer += number
+        return answer
 
 def test1():
     test_day08 = Day08('./day08-test.input')
