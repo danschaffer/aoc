@@ -94,7 +94,7 @@ def test1():
 def test2():
     test_day08 = Day08('./day08.input')
     assert test_day08.run_part1() == 514
-    assert test_day08.run_part2() == -1
+    assert test_day08.run_part2() == 1012272
 
 if __name__ == '__main__':
     print("advent of code: day08")
