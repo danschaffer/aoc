@@ -21,7 +21,6 @@ class Day10:
         return total
 
     def run_part2(self):
-        total = 0
         starts = '([{<'
         ends = ')]}>'
         scores = []
