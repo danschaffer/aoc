@@ -2,52 +2,59 @@
 
 class Day10:
     def __init__(self, file):
-        self.lines = open(file).readlines()
+        self.lines = [line.strip() for line in open(file).readlines()]
 
-    def run(self):
-        syntax = {'}':'{',']':'[',')':'(','>':'<','}':'{','[':']','(':')','<':'>'}
-        opener = ['{','[','<','(']
-        sightings = {'}':0, ']':0, ')':0, '>':0}
-        points = {'}':1197,']':57,')':3,'>':25137}
-        autototal = []
-        autopoints = {'{':3,'[':2,'(':1,'<':4}
+    def run_part1(self):
+        total = 0
+        starts = '([{<'
+        ends = ')]}>'
+        points = [3, 57, 1197, 25137]
         for line in self.lines:
-            line = line.strip()
-            opens = []
-            corrupted = False
+            stack = []
             for ch in line:
-                if ch in opener:
-                    opens.append(ch)
-                elif opens[-1] == syntax[ch]:
-                    opens.pop(-1)
+                if ch in starts:
+                    stack.insert(0, ch)
                 else:
-                    sightings[ch] += 1
-                    corrupted = True
-                    break
-            if corrupted == False:
-                autoscore = 0
-                while len(opens) > 0:
-                    autoscore = (autoscore * 5) + autopoints[opens[-1]]
-                    opens.pop(-1)
-                autototal.append(autoscore)
+                    start = stack.pop(0)
+                    if ends.find(ch) != starts.find(start):
+                        total += points[ends.find(ch)]
+        return total
 
-        part1 = sum([sightings[n]*points[n] for n in sightings])
-        part2 = sorted(autototal)[len(autototal)//2]
-        return part1,part2
-
+    def run_part2(self):
+        total = 0
+        starts = '([{<'
+        ends = ')]}>'
+        scores = []
+        for line in self.lines:
+            stack = []
+            corrupt = False
+            for ch in line:
+                if ch in starts:
+                    stack.insert(0, ch)
+                else:
+                    start = stack.pop(0)
+                    if ends.find(ch) != starts.find(start):
+                        corrupt = True
+                        continue
+            if corrupt is False and len(stack) > 0:
+                score = 0
+                for ch in stack:
+                    score = score * 5 + starts.find(ch) + 1
+                scores.append(score)
+        return sorted(scores)[len(scores)//2]
 
 def test1():
-    part1,part2 = Day10('./day10-test.input').run()
-    assert part1 == 26397
-    assert part2 == 288957
+    day10 = Day10('./day10-test.input')
+    assert day10.run_part1() == 26397
+    assert day10.run_part2() == 288957
 
 def test2():
-    part1,part2 = Day10('./day10.input').run()
-    assert part1 == 367227
-    assert part2 == 3583341858
+    day10 = Day10('./day10.input')
+    assert day10.run_part1() == 367227
+    assert day10.run_part2() == 3583341858
 
 if __name__ == '__main__':
     print("advent of code: day10")
-    part1,part2 = Day10('./day10.input').run()
-    print(f"part 1: {part1}")
-    print(f"part 2: {part2}")
+    day10 = Day10('./day10.input')
+    print(f"part 1: {day10.run_part1()}")
+    print(f"part 2: {day10.run_part2()}")
