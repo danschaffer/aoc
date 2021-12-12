@@ -25,10 +25,10 @@ class Day12:
                 part2 = False
             else:
                 return 0
-        seen = visited | {node}
+        visited = visited | {node}
         answer = 0
         for n in self.data[node]:
-            answer += self.run(n, seen, part2)
+            answer += self.run(n, visited, part2)
         return answer
 
 def test1():
