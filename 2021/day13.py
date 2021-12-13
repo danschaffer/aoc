@@ -51,10 +51,7 @@ class Day13:
                 else:
                     ch = '.'
                 line += ch
-            lines.append(line)
-        f = open('day13.output','w')
-        [f.write(line+'\n') for line in lines]
-        f.close()
+            print(line)
 
     def run(self):
         self.fold(self.folds.pop(0))
