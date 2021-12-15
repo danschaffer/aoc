@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from collections import Counter
 class Day14:
     def __init__(self, file):
         self.start = ''
@@ -11,25 +12,19 @@ class Day14:
             self.data[key.strip()] = value.strip()
 
     def run(self, steps=10):
-        counts = {}
-        for n,ch in enumerate(self.start):
-            if n < len(self.start) - 1:
-                key = ch+self.start[n+1]
-                counts[key] = counts.get(key,0) + 1
-        for ct in range(steps):
-            counts1 = counts
-            counts = {}
-            print(f"{ct} {counts}")
-            for key in counts.keys():
-                print(key)
-                result = self.data[key]
-                first = key[0] + result
-                second = result + key[1]
-                value = counts[key]
-                for i in range(value):
-                    counts[first] = counts.get(first,0) + 1
-                    counts[second] = counts.get(second,0) + 1
-        return max(counts.values()) - min(counts.values())
+        pairs = Counter()
+        for i in range(len(self.start)-1):
+            pairs[self.start[i]+self.start[i+1]] += 1
+        elements = Counter(self.start)
+        for _ in range(steps):
+            pairs1 = Counter()
+            for pair in pairs.keys():
+                insertion, old_count = self.data[pair], pairs[pair]
+                pairs1[pair[0]+insertion] += old_count
+                pairs1[insertion+pair[1]] += old_count
+                elements[insertion] += old_count
+            pairs = pairs1
+        return max(elements.values()) - min(elements.values())
 
 def test1():
     test_day14 = Day14('./day14-test.input')
@@ -39,10 +34,10 @@ def test1():
 def test2():
     test_day14 = Day14('./day14.input')
     assert test_day14.run(steps=10) == 2447
-#    assert test_day14.run(steps=40) == -1
+    assert test_day14.run(steps=40) == 3018019237563
 
 if __name__ == '__main__':
     print("advent of code: day14")
-    day14 = Day14('./day14-test.input')
+    day14 = Day14('./day14.input')
     print(f"part 1: {day14.run(steps=10)}")
-#    print(f"part 2: {day14.run(steps=40)}")
+    print(f"part 2: {day14.run(steps=40)}")
