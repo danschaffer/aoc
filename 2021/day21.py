@@ -45,7 +45,7 @@ class Day21:
             if self.score2 >= 1000:
                 return self.score1 * self.rolls
 
-    @functools.cache
+    @functools.lru_cache(maxsize=None)
     def count_wins(self, position_1, position_2, score_1, score_2):
         wins_1 = 0
         wins_2 = 0
