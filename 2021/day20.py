@@ -48,16 +48,19 @@ class Day20:
 
 def test1():
     test_day20 = Day20('./day20-test.input')
-    assert test_day20.run() == 35
-    assert test_day20.run_part2() == 3351
+    assert test_day20.run(2) == 35
+    test_day20 = Day20('./day20-test.input')
+    assert test_day20.run(50) == 3351
 
 def test2():
     test_day20 = Day20('./day20.input')
-    assert test_day20.run_part1() == 5432
-    assert test_day20.run_part2() == 16550
+    assert test_day20.run(2) == 5432
+    test_day20 = Day20('./day20.input')
+    assert test_day20.run(50) == 16016
 
 if __name__ == '__main__':
     print("advent of code: day20")
     day20 = Day20('./day20.input')
     print(f"part 1: {day20.run(2)}")
+    day20 = Day20('./day20.input')
     print(f"part 2: {day20.run(50)}")
