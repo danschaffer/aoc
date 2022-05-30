@@ -1,227 +1,99 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import heapq
-import sys
-import time
 class Day23:
-    def __init__(self, file):
-        data = {}
-        self.best = sys.maxsize
-        self.pods = set()
-        for y, line in enumerate(open(file).read().split('\n')):
-            for x, ch in enumerate(line):
-                data[(x,y)] = ch
-        self.data= data
-        self.goal = ".......AABBCCDD"
-        #            012345678901234
+    def __init__(self, file, part2=False):
+        self.puzzle = self.read_input(file, part2)
 
-#     012345678901
-#0    #############
-#1    #...........#
-#2    ###B#C#B#D###
-#3      #A#D#C#A#  
-#       #########  
+    def read_input(self, file, part2):
+        lines = []
+        for line in open(file).read().split('\n'):
+            data = [c for c in line if c in 'ABCD.']
+            if data:
+                lines.append(''.join(data))
+        if part2:
+            lines.insert(2, 'DCBA')
+            lines.insert(3, 'DBAC')
+        return ''.join(lines)
 
-    def print_dict(self, data):
-        maxx, maxy = max(data)
-        for y in range(maxy+1):
-            line = ''
-            for x in range(maxx+1):
-                if (x,y) in data:
-                    line += data[(x,y)]
-                else:
-                    line += ' '
-            print(line)
-
-    def print_str(self, board):
-        print("#############")
-        print(f"#{board[0]}{board[1]}.{board[2]}.{board[3]}.{board[4]}.{board[5]}{board[6]}#")
-        print(f"###{board[7]}#{board[9]}#{board[11]}#{board[13]}###")
-        print(f"  #{board[8]}#{board[10]}#{board[12]}#{board[14]}#")
-        print("  #########")
-
-    def to_string(self, data):
-        return data[(1,1)] + data[(2,1)] + data[(4,1)] + data[(6,1)] + data[(8,1)] + data[(10,1)] + data[(11,1)] + data[(3,2)] + data[(3,3)] + data[(5,2)] + data[(5,3)] + data[(7,2)] + data[(7,3)] + data[(9,2)] + data[(9,3)]
-
-    def to_dict(self, board):
-        data = {}
-        data[(1,1)] = board[0]
-        data[(2,1)] = board[1]
-        data[(3,1)] = '.'
-        data[(4,1)] = board[2]
-        data[(5,1)] = '.'
-        data[(6,1)] = board[3]
-        data[(7,1)] = '.'
-        data[(8,1)] = board[4]
-        data[(9,1)] = '.'
-        data[(10,1)] = board[5]
-        data[(11,1)] = board[6]
-        data[(3,2)] = board[7]
-        data[(3,3)] = board[8]
-        data[(5,2)] = board[9]
-        data[(5,3)] = board[10]
-        data[(7,2)] = board[11]
-        data[(7,3)] = board[12]
-        data[(9,2)] = board[13]
-        data[(9,3)] = board[14]
-        data[(12,1)] = '#'
-        data[(12,3)] = '#'
-        data[(2,4)] = '#'
-        data[(3,4)] = '#'
-        data[(4,4)] = '#'
-        data[(5,4)] = '#'
-        data[(12,4)] = ' '
-        return data
-
-    def get_cost(self,item):
-        assert item in 'ABCD'
-        return {'A':1,'B':10,'C':100,'D':1000}[item]
-
-    def get_move_cost(self, move, board):
-        m1, m2 = move
-        return (abs(m2[0]-m1[0]) + abs(m2[1]-m1[1])) * self.get_cost(board[m1])
-
-    def get_all_moves(self, board):
-        moves = []
-        data = self.to_dict(board)
-        for pod in self.get_pods(data):
-            moves1 = self.get_all_top_moves(data, pod)
-            moves2 = self.get_all_room_moves(data, pod)
-            moves =  moves + moves1 + moves2
-        return moves
-
-    def get_pods(self, board):
-        pods = []
-        maxx, maxy = max(board)
-        for y in range(maxy+1):
-            for x in range(maxx+1):
-                if (x,y) in board and board[(x,y)] in 'ABCD':
-                    pods.append((x,y))
-        return pods
-          
-    def get_all_top_moves(self, board, pod):
-        moves = []
-        x, y = pod
-        if y == 1:
-            return []
-        type = board[pod]
-        num = ord(type) - ord('A')
-        dest_x = num * 2 + 3
-        if y == 3 and x == dest_x:
-            return []
-        if y == 2 and x == dest_x and board[(x,3)] == type:
-            return []
-        if y == 3 and board[(x,2)] != '.':
-            return []
-        for x1 in [1,2,4,6,8,10,11]:
-            if x > x1:
-                passed = True
-                for x2 in range(x1,x+1):
-                    if board[(x2,1)] != '.':
-                        passed = False
-                        break
-                if passed:
-                    board1 = board.copy()
-                    board1[(x,y)] = '.'
-                    board1[(x1,1)] = type
-                    moves.append((self.get_cost(type)*((y-1)+x-x1),self.to_string(board1)))
-            else:
-                passed = True
-                for x2 in range(x,x1+1):
-                    if board[(x2,1)] != '.':
-                        passed = False
-                        break
-                if passed:
-                    board1 = board.copy()
-                    board1[(x,y)] = '.'
-                    board1[(x1,1)] = type
-                    moves.append((self.get_cost(type)*((y-1)+x1-x),self.to_string(board1)))
-        return moves        
-
-    def get_all_room_moves(self, board, pod):
-        x, y = pod
-        if y != 1:
-            return []
-        type = board[pod]
-        num = ord(type) - ord('A')
-        dest_x = num * 2 + 3
-        if x > dest_x:
-            for n in range(dest_x, x):
-                if board[n, 1] != '.':
-                    return []
-        else:
-            for n in range(x+1, dest_x):
-                if board[n, 1] != '.':
-                    return []
-        if board[(num * 2 + 3, 3)] == '.' and board[(num * 2 + 3, 2)] == '.':
-            board1 = board.copy()
-            board1[pod] = '.'
-            board1[(num*2+3,3)] = type
-            return [(self.get_cost(type) * (abs(x-num*2-3)+2), self.to_string(board1))]
-        if board[(num * 2 + 3, 3)] == type and board[(num * 2 + 3, 2)] == '.':
-            board1 = board.copy()
-            board1[pod] = '.'
-            board1[(num*2+3,2)] = type
-            return [(self.get_cost(type) * (abs(x-num*2-3)+1), self.to_string(board1))]
-        return []
-
-    def get_score(self,board):
-        score = 8
-        if board[7] == 'A':
-            score -= 1
-        if board[8] == 'A':
-            score -= 1
-        if board[9] == 'B':
-            score -= 1
-        if board[10] == 'B':
-            score -= 1
-        if board[11] == 'C':
-            score -= 1
-        if board[12] == 'C':
-            score -= 1
-        if board[13] == 'D':
-            score -= 1
-        if board[14] == 'D':
-            score -= 1
-        return score
-
-    def do_move(self, board, move):
-        m1, m2 = move
-        cost = self.get_move_cost(move, board)
-        print(f"{board[m1]} from {m1} to {m2} {cost}")
-        board[m2] = board[m1]
-        board[m1] = '.'
-        self.print_dict(board)
-        return cost
-
-    def solve(self):
-        start = self.to_string(self.data)
-        frontier = []
-        heapq.heappush(frontier,(self.get_score(start),(start,0)))
-        while frontier:
-            score, (board,cost0)= heapq.heappop(frontier)
-            if cost0 >= self.best:
+    @staticmethod
+    def can_leave_room(puzzle, room_pos):
+        for a in room_pos:
+            if puzzle[a] == '.':
                 continue
-            if board == self.goal:
-                print(f"solution found: {cost0} {len(frontier)} {round(time.time()-self.start,1)}")
-                self.best = cost0
-            for cost, board1 in self.get_all_moves(board):
-                score = self.get_score(board1)
-                heapq.heappush(frontier, (score,(board1,cost+cost0)))
+            return a
+
+    @staticmethod
+    def blocked(a, b, puzzle):
+        step = 1 if a<b else -1
+        for pos in range(a+step, b+step, step):
+            if puzzle[pos] != '.': return True
+
+    @staticmethod
+    def get_possible_parc_pos(a, parc, puzzle):
+        for b in [pos for pos in parc if puzzle[pos] == '.']:
+            if Day23.blocked(a,b,puzzle): continue
+            yield b
+
+    @staticmethod
+    def move(a,b,puzzle):
+        p = list(puzzle)
+        p[a], p[b] = p[b], p[a]
+        return ''.join(p)
+
+    @staticmethod
+    def can_enter_room(a,b,amphi, puzzle,room_pos):
+        for pos in room_pos:
+            if puzzle[pos] == '.': best_pos = pos
+            elif puzzle[pos] != amphi: return False
+        if not Day23.blocked(a,b,puzzle): return best_pos
+
+    @staticmethod
+    def possible_moves(puzzle, parc, stepout, target):
+        for a in [pos for pos in parc if puzzle[pos] != '.']:
+            amphi = puzzle[a]
+            if (b:=Day23.can_enter_room(a, stepout[amphi], amphi, puzzle, target[amphi])):
+                yield a,b
+        for room in 'ABCD':
+            if not (a:=Day23.can_leave_room(puzzle, target[room])): continue
+            for b in Day23.get_possible_parc_pos(stepout[room], parc, puzzle):
+                yield a,b
+
+    def run(self):
+        puzzle = self.puzzle
+        energy = dict(A=1, B=10, C=100, D=1000)
+        parc = [0,1,3,5,7,9,10]
+        stepout = dict(A=2, B=4, C=6, D=8)
+        target = {r: range(ord(r)-54, len(puzzle),4) for r in 'ABCD'}
+        targetI = {v:key for key,val in target.items() for v in val}
+        solution = '.'*11+'ABCD'*((len(puzzle)-11)//4)
+        heap, seen = [(0,puzzle)], {puzzle:0}
+        while heap:
+            cost, state = heapq.heappop(heap)
+            if state == solution: return cost
+            for a,b in Day23.possible_moves(state, parc, stepout, target):
+                p,r = (a,b) if a < b else (b,a)
+                distance = abs(stepout[targetI[r]]-p) + (r-7)//4
+                new_cost = cost + distance * energy[state[a]]
+                moved = Day23.move(a,b,state)
+                if seen.get(moved,999999) <= new_cost: continue
+                seen[moved] = new_cost
+                heapq.heappush(heap,(new_cost, moved))
 
 def test1():
-    day23 = Day23('./day23-test.input')
-    day23.solve()
-    assert day23.best == 12521
+    assert Day23('day23-test.input').run() == 12521
 
 def test2():
-    day23 = Day23('./day23.input')
-    day23.solve()
-    assert day23.best == 18051 # pypy3 1912s
+    assert Day23('day23.input').run() == 18051
+
+def test3():
+    assert Day23('day23-test.input', part2=True).run() == 44169
+
+def test4():
+    assert Day23('day23.input', part2=True).run() == 50245
 
 if __name__ == '__main__':
     print("advent of code: day23")
-#    day23 = Day23('./day23-test.input')
     day23 = Day23('./day23.input')
-    day23.start = time.time()
-    day23.solve()
-    print(f"part 1: {day23.best} {round(time.time()-day23.start,1)}s")
+    print(f"part 1: {day23.run()}")
+    day23 = Day23('./day23.input', part2=True)
+    print(f"part 2: {day23.run()}")

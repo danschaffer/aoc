@@ -6,9 +6,9 @@ https://adventofcode.com
 Here are my solutions to advent of code.  I have used python for all
 solutions.
 
-total: 300
+total: 350
 
-- 2021 in progress...
+- 2021 50 points, trouble with 23 
 - 2020 50 points, needed lots of help on about 5 problems
 - 2019 50 points, needed help of several solutions, trouble with 20,22,24, Nov 2021
 - 2018 50 points, needed help with 15,21,22 Nov 2021
