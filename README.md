@@ -8,8 +8,8 @@ solutions.
 
 total: 350
 
-- 2021 50 points, trouble with 23 
-- 2020 50 points, needed lots of help on about 5 problems
+- 2021 50 points, trouble with 23, finished May 2022 
+- 2020 50 points, needed lots of help on about 5 problem, Jan 2021s
 - 2019 50 points, needed help of several solutions, trouble with 20,22,24, Nov 2021
 - 2018 50 points, needed help with 15,21,22 Nov 2021
 - 2017 50 points, completed all solutions in Feb 2021
