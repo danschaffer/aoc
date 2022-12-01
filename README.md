@@ -8,6 +8,7 @@ solutions.
 
 total: 350
 
+- 2022 in progress...
 - 2021 50 points, trouble with 23, finished May 2022 
 - 2020 50 points, needed lots of help on about 5 problem, Jan 2021s
 - 2019 50 points, needed help of several solutions, trouble with 20,22,24, Nov 2021
