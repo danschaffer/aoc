@@ -1,52 +1,47 @@
 #!/usr/bin/env python3
-
+import sys
 class Day03:
     def __init__(self, file):
         self.file = file
 
     @staticmethod
-    def get_score(ch):
-        if ord(ch) >= ord('a'):
-            return ord(ch) - ord('a') + 1
-        else:
-            return ord(ch) - ord('A') + 27
-
-    def run_part1(self):
+    def get_score(chs):
         answer = 0
+        for ch in chs:
+            if ord(ch) >= ord('a'):
+                answer += ord(ch) - ord('a') + 1
+            else:
+                answer += ord(ch) - ord('A') + 27
+        return answer
+
+    def run(self):
+        answer1 = answer2 = 0
+        lines2 = []
         for line in open(self.file).readlines():
             line = line.strip()
-            s1 = line[0:len(line)//2]
-            s2 = line[len(line)//2:]
-            for ch in set(s1).intersection(s2):
-                answer += self.get_score(ch)
-        return answer
-
-    def run_part2(self):
-        answer = 0
-        lines = []
-        for line in open(self.file).readlines():
-            lines.append(line.strip())
-        for ct in range(len(lines)//3):
-            line1 = lines[ct*3 + 0]
-            line2 = lines[ct*3 + 1]
-            line3 = lines[ct*3 + 2]
-            diffs = set(line1).intersection(line2).intersection(line3)
-            for ch in diffs:
-                answer += self.get_score(ch)
-        return answer
+            lines2.append(line)
+            if len(lines2) == 3:
+                diffs = set(lines2[0]).intersection(lines2[1]).intersection(lines2[2])
+                answer2 += Day03.get_score(diffs)
+                lines2 = []
+            answer1 += Day03.get_score(set(line[0:len(line)//2]).intersection(line[len(line)//2:]))
+        return answer1, answer2
 
 def test1():
-    test_day03 = Day03('./day03-test.input')
-    assert test_day03.run_part1() == 157
-    assert test_day03.run_part2() == 70
+    answer1, answer2 = Day03('./day03-test.input').run()
+    assert answer1 == 157
+    assert answer2 == 70
 
 def test2():
-    test_day03 = Day03('./day03.input')
-    assert test_day03.run_part1() == 7967
-    assert test_day03.run_part2() == 2716
+    answer1, answer2 = Day03('./day03.input').run()
+    assert answer1 == 7967
+    assert answer2 == 2716
 
 if __name__ == '__main__':
     print("advent of code: day03")
-    day03 = Day03('./day03.input')
-    print(f"part 1: {day03.run_part1()}")
-    print(f"part 2: {day03.run_part2()}")
+    file = './day03.input'
+    if len(sys.argv) > 1:
+        file = sys.argv[1]
+    answer1, answer2 = Day03(file).run()
+    print(f"part 1: {answer1}")
+    print(f"part 2: {answer2}")
