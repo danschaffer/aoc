@@ -1,6 +1,25 @@
 Tips
 ====
 
+### pytest
+```
+def test1():
+    test_day = Day('./day-test.input')
+    assert test_day.run_part1() == -1
+    assert test_day.run_part2() == -1
+
+# pytest -v *.py
+# pytest --durations=0 *.py
+```
+
+### parse list int
+```
+data = [int(line.strip()) for line in open(file).readlines()]
+
+for line in open(file.readlines()):
+    line = line.strip()
+```
+
 ### static method
 
 ```
