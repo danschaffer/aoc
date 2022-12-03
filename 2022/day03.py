@@ -4,6 +4,13 @@ class Day03:
     def __init__(self, file):
         self.file = file
 
+    @staticmethod
+    def get_score(ch):
+        if ord(ch) >= ord('a'):
+            return ord(ch) - ord('a') + 1
+        else:
+            return ord(ch) - ord('A') + 27
+
     def run_part1(self):
         answer = 0
         for line in open(self.file).readlines():
@@ -11,10 +18,7 @@ class Day03:
             s1 = line[0:len(line)//2]
             s2 = line[len(line)//2:]
             for ch in set(s1).intersection(s2):
-                if ord(ch) >= ord('a'):
-                    answer += ord(ch) - ord('a') + 1
-                else:
-                    answer += ord(ch) - ord('A') + 27
+                answer += self.get_score(ch)
         return answer
 
     def run_part2(self):
@@ -28,10 +32,7 @@ class Day03:
             line3 = lines[ct*3 + 2]
             diffs = set(line1).intersection(line2).intersection(line3)
             for ch in diffs:
-                if ord(ch) >= ord('a'):
-                    answer += ord(ch) - ord('a') + 1
-                else:
-                    answer += ord(ch) - ord('A') + 27
+                answer += self.get_score(ch)
         return answer
 
 def test1():
