@@ -2,19 +2,17 @@
 import math
 import sys
 class Day09:
-    def __init__(self, file):
+    def __init__(self, file, p2=False):
         self.moves = [line.strip() for line in open(file).readlines()]
-        self.h = (0,0)
-        self.t = (0,0)
+        if not p2:
+            self.snake = [(0,0) for _ in range(2)]
+        else:
+            self.snake = [(0,0) for _ in range(10)]
         self.visited = {(0,0)}
 
     @staticmethod
     def is_adjacent(p1,p2):
         return (p1[0]==p2[0] and abs(p1[1]-p2[1]) == 1) or (p1[1]==p2[1] and abs(p1[0]-p2[0])==1)
-
-    @staticmethod
-    def is_2adjacent(p1,p2):
-        return (p1[0]==p2[0] and abs(p1[1]-p2[1]) == 2) or (p1[1]==p2[1] and abs(p1[0]-p2[0])==2)
 
     @staticmethod
     def is_diagonal(p1,p2):
@@ -26,67 +24,67 @@ class Day09:
 
     @staticmethod
     def do_move(p, move):
-        if move == 'R':
-            p =(p[0]+1,p[1])
-        elif move == 'L':
-            p =(p[0]-1,p[1])
-        elif move == 'U':
-            p =(p[0],p[1]-1)
-        elif move == 'D':
-            p =(p[0],p[1]+1)
-        elif move == 'UL':
-            p =(p[0]-1,p[1]-1)
-        elif move == 'UR':
-            p =(p[0]+1,p[1]-1)
-        elif move == 'DL':
-            p =(p[0]-1,p[1]+1)
-        elif move == 'DR':
-            p =(p[0]+1,p[1]+1)
-        return p
+        move1 = {'R':(1,0),'L':(-1,0),'U':(0,-1),'D':(0,1),'UL':(-1,-1),'UR':(1,-1),'DL':(-1,1),'DR':(1,1)}[move]
+        return (p[0]+move1[0],p[1]+move1[1])
 
-    def move_tail(self):
-        if Day09.is_touching(self.h, self.t):
+    def move_tail(self, i):
+        if Day09.is_touching(self.snake[i], self.snake[i-1]):
             return
-        for move in ['R','L','U','D','UR','UL','DR','DL']:
-            t2 = Day09.do_move(self.t, move)
-            if Day09.is_adjacent(self.h, t2):
-                self.t = t2
-                break
-        self.visited.add(self.t)
+        for move in ['R','L','U','D']:
+            t2 = Day09.do_move(self.snake[i], move)
+            if Day09.is_adjacent(self.snake[i-1], t2):
+                self.snake[i] = t2
+                return
+        for move in ['UR','UL','DR','DL']:
+            t2 = Day09.do_move(self.snake[i], move)
+            if Day09.is_adjacent(self.snake[i-1], t2):
+                self.snake[i] = t2
+                return
+        for move in ['UR','UL','DR','DL']:
+            t2 = Day09.do_move(self.snake[i], move)
+            if Day09.is_diagonal(self.snake[i-1], t2):
+                self.snake[i] = t2
+                return
 
-    def run_part1(self):
+    def run(self):
         for movestr in self.moves:
             move, num = movestr.split()
             for _ in range(int(num)):
-                self.h = Day09.do_move(self.h, move)
-                self.move_tail()
+                self.snake[0] = Day09.do_move(self.snake[0], move)
+                for i in range(1,len(self.snake)):
+                    self.move_tail(i)
+                self.visited.add(self.snake[-1])
         return len(self.visited)
 
-    def run_part2(self):
-        return -1
-
     def print_grid(self):
-        for y in range(-4,1):
+        for y in range(-20,5):
             s = ''
-            for x in range(0,5):
-                if self.h == (x,y):
-                    s += 'H'
-                elif self.t == (x,y):
-                    s += 'T'
-                else:
-                    s += '.'
+            for x in range(-5,20):
+                try:
+                    fnd = self.snake.index((x,y))
+                    if fnd == 0:
+                        fnd = 'H'
+                    else:
+                        fnd = str(fnd)
+                except:
+                    fnd = '.'
+                    if (x,y) == (0,0):
+                        fnd = 's'
+                    else:
+                        fnd = '.'
+                s += fnd
             print(s)
-        print()
+
 
 def test1():
-    test_day09 = Day09('./day09-test.input')
-    assert test_day09.run_part1() == 13
-    assert test_day09.run_part2() == -1
+    assert Day09('./day09-test.input').run() == 13
+    assert Day09('./day09-test.input', p2=True).run() == 1
+    assert Day09('./day09-test2.input').run() == 88
+    assert Day09('./day09-test2.input', p2=True).run() == 36
 
 def test2():
-    test_day09 = Day09('./day09.input')
-    assert test_day09.run_part1() == 5683
-    assert test_day09.run_part2() == -1
+    assert Day09('./day09.input').run() == 5683
+    assert Day09('./day09.input', p2=True).run() == 2372
 
 if __name__ == '__main__':
     print("advent of code: day09")
@@ -94,5 +92,5 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         file = sys.argv[1]
     day09 = Day09(file)
-    print(f"part 1: {day09.run_part1()}")
-    print(f"part 2: {day09.run_part2()}")
+    print(f"part 1: {Day09(file).run()}")
+    print(f"part 2: {Day09(file, p2=True).run()}")
