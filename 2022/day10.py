@@ -2,76 +2,48 @@
 import sys
 class Day10:
     def __init__(self, file):
-        self.regs = []
-        self.noops = []
-        self.data = open(file).readlines()
-        for n, line in enumerate(self.data):
-            line = line.strip()
-            parts = line.split()
-            if len(parts) == 1:
-                self.noops.append(n)
-            else:
-                self.regs.append(int(parts[1]))
+        self.lines = [line.strip() for line in open(file).readlines()]
 
-    def get_strength(self, n):
-        answer = 1
-        ctr = 0
-        sigctr = 0
-        index = 0
-        while ctr < n:
-            if index in self.noops:
-                ctr += 1
-            else:
-                if ctr + 2 < n:
-                    answer += self.regs[sigctr]
-                    sigctr += 1
-                ctr += 2
-            index += 1
-        return answer
+    @staticmethod
+    def get_char(cycle, x):
+        if abs((cycle % 40) - x) < 2:
+            return '#'
+        return '.'
 
-    def run_part1(self):
-        answer = 0
-        for signal in [20, 60, 100, 140, 180, 220]:
-            answer += signal * self.get_strength(signal)
-        return answer
-
-    def run_part2(self):
-        output = ""
-        cycle = 1
+    def run(self):
+        cycle = 0
         x = 1
-        index = 0
+        answer2 = ''
+        answer1 = 0
+        part1 = [20, 60, 100, 140, 180, 220]
         while cycle < 240:
-            if abs(((cycle - 1) % 40) - x) <= 1:
-                output += "#"
-            else:
-                output += "."
+            answer2 += Day10.get_char(cycle, x)
             cycle += 1
-            if self.data[index].strip() != 'noop':
-                if abs(((cycle - 1) % 40) - x) <= 1:
-                    output += "#"
-                else:
-                    output += "."
+            if cycle in part1:
+                answer1 += cycle * x
+            line = self.lines.pop(0)
+            if line.startswith('addx'):
+                answer2 += Day10.get_char(cycle, x)
                 cycle += 1
-                x += int(self.data[index].split()[1])
-            index += 1
-            print(f"{cycle}: cycle {index} index x {x}")
-            print(output)
-            print(self.data[index].strip())
-        return output[0:40] + '\n' + output[40:80] + '\n' + output[80:120] + '\n' + output[120:160] + '\n' + output[160:200] + '\n' + output[200:240] + '\n'
+                if cycle in part1:
+                    answer1 += cycle * x
+                x += int(line.split()[1])
+        answer2_fmt = ''.join([answer2[40*i:40*(i+1)] + '\n' for i in range(6)])
+        return answer1, answer2_fmt
             
 def test1():
-    test_day10 = Day10('./day10-test.input')
-    assert test_day10.run_part1() == 13140
+    answer1, _ = Day10('./day10-test.input').run()
+    assert answer1 == 13140
 
 def test2():
-    test_day10 = Day10('./day10.input')
-    assert test_day10.run_part1() == 11220
+    answer1, _ = Day10('./day10.input').run()
+    assert answer1 == 11220
 
 if __name__ == '__main__':
     print("advent of code: day10")
-    file = './day10-test.input'
+    file = './day10.input'
     if len(sys.argv) > 1:
         file = sys.argv[1]
-    day10 = Day10(file)
-    print(f"part 1: {day10.run_part1()}")
-    print(f"part 2: \n{day10.run_part2()}") # BZPAJELK
+    answer1, answer2 = Day10(file).run()
+    print(f"part 1: {answer1}")
+    print(f"part 2: \n{answer2}") # BZPAJELK
