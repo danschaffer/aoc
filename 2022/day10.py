@@ -32,12 +32,16 @@ class Day10:
         return answer1, answer2_fmt
             
 def test1():
-    answer1, _ = Day10('./day10-test.input').run()
+    answer1, answer2 = Day10('./day10-test.input').run()
     assert answer1 == 13140
+    assert answer2.count('#') == 124
+    assert answer2.count('.') == 116
 
 def test2():
-    answer1, _ = Day10('./day10.input').run()
+    answer1, answer2 = Day10('./day10.input').run()
     assert answer1 == 11220
+    assert answer2.count('#') == 97
+    assert answer2.count('.') == 143
 
 if __name__ == '__main__':
     print("advent of code: day10")
