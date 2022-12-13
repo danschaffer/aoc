@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-import copy
-import heapq
 import sys
 class Day12:
     def __init__(self, file):
@@ -35,11 +33,9 @@ class Day12:
             self.unvisited.remove(current)
             x,y = current
             for neighbor in [(x-1,y),(x+1,y),(x,y-1),(x,y+1)]:
-                if neighbor not in self.data or self.data[current] - self.data[neighbor] > 1:
-                    continue
-                x1, y1 = neighbor
-                if self.nodes[current] + 1 < self.nodes[neighbor]:
-                    self.nodes[neighbor] = self.nodes[current] + 1
+                if neighbor in self.data and self.data[current] - self.data[neighbor] <= 1:
+                    if self.nodes[current] + 1 < self.nodes[neighbor]:
+                        self.nodes[neighbor] = self.nodes[current] + 1
 
 def test1():
     answer1, answer2= Day12('./day12-test.input').run()
