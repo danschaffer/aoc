@@ -2,6 +2,7 @@
 **/__pycache__
 **/.idea
 **/env*
+**/.python-version
 */.pytest_cache
 */.python-version
 .vscode
