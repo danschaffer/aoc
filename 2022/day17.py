@@ -87,40 +87,49 @@ class Day17:
             data, height = Day17.add(shape,data,height)
         return height
 
+    @staticmethod
+    def collision2(shape, data):
+        for pt in shape:
+            if pt[1] == 0 or pt[1] == data[pt[0]]:
+                return True
+            if pt[1] < 0 or pt[1] > 6:
+                return True
+        return False
+
+    @staticmethod
+    def add2(shape,data,height):
+        for pt in shape:
+            data[pt[0]] = max(data[pt[0]], pt[1])
+            height = max(height,pt[1])
+        return data, height
+
     def run_part2(self):
-        data = set()
+        data = [-1 for _ in range(7)]
         rocks = 0
         height = 0
         jet = 0
-        last = 0
-        pattern = set()
-        cache = {}
-        while True:
-            if rocks % 10091 * 5 * 345 == 0:
-                print(f"{rocks} {height} {height-last}")
-                last = height
+        while rocks < 2022:
             shape = self.shapes[rocks % len(self.shapes)]
             rocks += 1
             shape = Day17.move(shape, (0,height + 4))
             while True:
                 move1 = (self.jet_pattern[jet % len(self.jet_pattern)], 0)
                 jet += 1
+                print(f"{move1} {shape}")
                 shape1 = Day17.move(shape, move1)
-                if not Day17.collision(shape1, data):
+                if not Day17.collision2(shape1, data):
                     shape = shape1
                 shape1 = Day17.move(shape, (0,-1))
-                if Day17.collision(shape1, data):
+                if Day17.collision2(shape1, data):
                     break
                 shape = shape1
-            data, height = Day17.add(shape,data,height)
+            import pdb; pdb.set_trace()
+            data, height = Day17.add2(shape,data,height)
         return height
 
 def test1():
     test_day17 = Day17('./day17-test.input')
     assert test_day17.run_part1() == 3068
-    # (1000000000000 - 400)/1400 = 714285714
-    # 608 + (2728-608)*714285714
-    assert 608 + (2728-608) * ((1000000000000 - 400)/1400) == 1514285714288
 
 def test2():
     test_day17 = Day17('./day17.input')
@@ -128,15 +137,10 @@ def test2():
 
 if __name__ == '__main__':
     print("advent of code: day17")
-    file = './day17.input'
+    file = './day17-test.input'
     if len(sys.argv) > 1:
         file = sys.argv[1]
     day17 = Day17(file)
     print(f"part 1: {day17.run_part1()}")
-    if file == './day17-test.input':
-        answer = int(608 + (2728-608) * ((1000000000000 - 400)/1400))
-        print(f"part 2: {answer}")
-    else:
-        answer = day17.run_part2()
-        print(f"part 2: {answer}")
+    print(f"part 2: {day17.run_part2()}")
 
