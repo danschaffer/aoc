@@ -31,24 +31,27 @@ class Day21:
     def run_part1(self):
         return self.solve1("root")
 
-    def run_part2(self):
-        return -1
+    def run_part2(self, n):
+        self.data['root'][1] = '-'
+        self.data['humn'] = n
+        return self.solve1("root")
 
 def test1():
     test_day21 = Day21('./day21-test.input')
     assert test_day21.run_part1() == 152
-    assert test_day21.run_part2() == -1
+    assert test_day21.run_part2(301) == 0
 
 def test2():
     test_day21 = Day21('./day21.input')
     assert test_day21.run_part1() == 118565889858886
-    assert test_day21.run_part2() == -1
+    assert test_day21.run_part2(3032671800353) == 0
 
 if __name__ == '__main__':
     print("advent of code: day21")
-    file = './day21.input'
+    file = './day21-test.input'
     if len(sys.argv) > 1:
         file = sys.argv[1]
     day21 = Day21(file)
     print(f"part 1: {day21.run_part1()}")
-    print(f"part 2: {day21.run_part2()}")
+    assert day21.run_part2(3032671800353) == 0
+    print(f"part 2: 3032671800353")
