@@ -3,6 +3,8 @@
 **/.idea
 **/env*
 **/.python-version
+**/.lsp
+**/.clj-kondo
 */.pytest_cache
 */.python-version
 .vscode
