@@ -1,13 +1,14 @@
 package main
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestPart1Sample(t *testing.T) {
-	lines, err := readLines("sample.txt")
+	nums1, nums2, err := parse("sample.txt")
 	if err != nil {
-		t.Skip("sample.txt not present")
+		t.Fatalf("part1(sample) = %s", err)
 	}
-	nums1, nums2 := parse(lines)
 	got := part1(nums1, nums2)
 	want := 11
 	if got != want {
@@ -16,11 +17,10 @@ func TestPart1Sample(t *testing.T) {
 }
 
 func TestPart2Sample(t *testing.T) {
-	lines, err := readLines("sample.txt")
+	nums1, nums2, err := parse("sample.txt")
 	if err != nil {
-		t.Skip("sample.txt not present")
+		t.Fatalf("part2(sample) = %s", err)
 	}
-	nums1, nums2 := parse(lines)
 	got := part2(nums1, nums2)
 	want := 31
 	if got != want {
