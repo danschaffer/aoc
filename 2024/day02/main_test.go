@@ -9,7 +9,7 @@ func TestPart1Sample(t *testing.T) {
 	}
 	got := part1(lines)
 	want := 2
-	if want != 0 && got != want {
+	if got != want {
 		t.Errorf("part1(sample) = %d, want %d", got, want)
 	}
 }
@@ -21,7 +21,7 @@ func TestPart2Sample(t *testing.T) {
 	}
 	got := part2(lines)
 	want := 4
-	if want != 0 && got != want {
+	if got != want {
 		t.Errorf("part2(sample) = %d, want %d", got, want)
 	}
 }

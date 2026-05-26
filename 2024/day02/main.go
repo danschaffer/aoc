@@ -26,35 +26,31 @@ func removeAt(nums []int, i int) []int {
 }
 
 func isSafe(level []int) bool {
-	unsafe := false
-	increase := false
-	for i := range level {
-		if i == 0 {
-			if level[0] < level[1] {
-				increase = true
-			}
-			if level[0] == level[1] {
-				unsafe = true
-				break
-			}
-		} else {
-			if increase && (level[i]-level[i-1] > 3 || level[i]-level[i-1] < 1) {
-				unsafe = true
-				break
-			} else if !increase && (level[i-1]-level[i] > 3 || level[i-1]-level[i] < 1) {
-				unsafe = true
-				break
-			}
+	if len(level) < 2 {
+		return true
+	}
+	increasing := false
+	if level[0] < level[1] {
+		increasing = true
+	}
+	if level[0] == level[1] {
+		return false
+	}
+	for i := 1; i < len(level); i++ {
+		if increasing && (level[i]-level[i-1] > 3 || level[i]-level[i-1] < 1) {
+			return false
+		} else if !increasing && (level[i-1]-level[i] > 3 || level[i-1]-level[i] < 1) {
+			return false
 		}
 	}
-	return !unsafe
+	return true
 }
 
 func part1(lines [][]int) int {
 	safe := 0
 	for _, level := range lines {
 		if isSafe(level) {
-			safe += 1
+			safe++
 		}
 	}
 	return safe
@@ -64,13 +60,13 @@ func part2(lines [][]int) int {
 	safe := 0
 	for _, level := range lines {
 		if isSafe(level) {
-			safe += 1
+			safe++
 			continue
 		}
 		for i := range len(level) {
 			level0 := removeAt(level, i)
 			if isSafe(level0) {
-				safe += 1
+				safe++
 				break
 			}
 		}
@@ -95,5 +91,5 @@ func parse(path string) ([][]int, error) {
 		}
 		result = append(result, nums)
 	}
-	return result, nil
+	return result, s.Err()
 }
