@@ -8,19 +8,22 @@ import (
 	"strconv"
 )
 
+var re = regexp.MustCompile(`mul\((\d+),(\d+)\)|do\(\)|don't\(\)`)
+
+type Part int
+
+const (
+	Part1 Part = iota + 1
+	Part2
+)
+
 func main() {
 	contents := parse("input.txt")
-	fmt.Println("Part 1:", parts(contents, true))
-	fmt.Println("Part 2:", parts(contents, false))
+	fmt.Println("Part 1:", solve(contents, Part1))
+	fmt.Println("Part 2:", solve(contents, Part2))
 }
 
-func parts(contents string, part1 bool) int {
-	var re *regexp.Regexp
-	if part1 {
-		re = regexp.MustCompile(`mul\((\d+),(\d+)\)`)
-	} else {
-		re = regexp.MustCompile(`mul\((\d+),(\d+)\)|do\(\)|don't\(\)`) 
-	}
+func solve(contents string, part Part) int {
 	matches := re.FindAllStringSubmatch(contents, -1)
 	sum := 0
 	enable := true
@@ -31,7 +34,7 @@ func parts(contents string, part1 bool) int {
 		case match[0] == "don't()":
 			enable = false
 		default:
-			if enable {
+			if part == Part1 || enable {
 				first, _ := strconv.Atoi(match[1])
 				second, _ := strconv.Atoi(match[2])
 				sum += first * second
