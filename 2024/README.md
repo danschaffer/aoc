@@ -1,16 +1,32 @@
 # Advent of Code 2024
 
-## Run a solution
+Each day has a language-suffixed directory: `dayXX-go`, `dayXX-py`, `dayXX-js`.
+
+Use the scaffold scripts from the repo root to create a new day:
 
 ```
-cd dayXX
+./goday <day>   # creates 2024/dayXX-go/
+./pyday <day>   # creates 2024/dayXX-py/
+./jsday <day>   # creates 2024/dayXX-js/
+```
+
+All three download `input.txt` automatically (requires `$COOKIE`).
+
+---
+
+## Go (`dayXX-go/`)
+
+### Run
+
+```
+cd dayXX-go
 go run .
 ```
 
-## Test
+### Test
 
 ```
-cd dayXX
+cd dayXX-go
 go test .
 ```
 
@@ -20,18 +36,16 @@ Force a fresh run (bypass cache):
 go test -count=1 .
 ```
 
-Run all days from the 2024 root:
+Run all Go days from the 2024 root:
 
 ```
 go test ./...
 ```
 
-`go test .` tests the current package. `./...` recursively tests all packages — useful from the repo root to run every day at once.
-
-## Measure time
+### Measure time
 
 ```
-cd dayXX
+cd dayXX-go
 time go run .
 ```
 
@@ -41,14 +55,14 @@ Or benchmark via the test binary:
 go test -bench=. -benchtime=5s ./...
 ```
 
-## Debug
+### Debug
 
 Print values inline with `fmt.Println` or `fmt.Printf`.
 
 Step through with `dlv` (Delve):
 
 ```
-cd dayXX
+cd dayXX-go
 dlv debug .
 ```
 
@@ -69,6 +83,67 @@ Debug a specific test:
 ```
 dlv test -- -run TestPart1Sample
 ```
+
+---
+
+## Python (`dayXX-py/`)
+
+### Run
+
+```
+cd dayXX-py
+python day.py
+```
+
+Pass the sample file to test against the example:
+
+```
+python day.py sample.txt
+```
+
+### Test (pytest)
+
+```
+cd dayXX-py
+pytest day.py
+```
+
+Or from the 2024 root:
+
+```
+pytest */day.py
+```
+
+### Measure time
+
+```
+time python day.py
+```
+
+---
+
+## JavaScript (`dayXX-js/`)
+
+### Run
+
+```
+cd dayXX-js
+node day.js
+```
+
+Pass the sample file to test against the example:
+
+```
+node day.js sample.txt
+```
+
+### Measure time
+
+```
+time node day.js
+```
+
+---
 
 ## Debug in VS Code
 
@@ -95,14 +170,14 @@ Requires the [Go extension](https://marketplace.visualstudio.com/items?itemName=
       "type": "go",
       "request": "launch",
       "mode": "debug",
-      "program": "${workspaceFolder}/day01"
+      "program": "${workspaceFolder}/day01-go"
     },
     {
       "name": "Debug day01 tests",
       "type": "go",
       "request": "launch",
       "mode": "test",
-      "program": "${workspaceFolder}/day01",
+      "program": "${workspaceFolder}/day01-go",
       "args": ["-run", "TestPart1Sample"]
     }
   ]

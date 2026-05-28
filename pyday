@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Scaffold a new AoC Go day and download input.
-# Usage: ./goday <day> [year]
-#   ./goday 1            -> 2024/day01-go
-#   ./goday 5 2025       -> 2025/day05-go
+# Scaffold a new AoC Python day and download input.
+# Usage: ./pyday <day> [year]
+#   ./pyday 1            -> 2024/day01-py
+#   ./pyday 5 2025       -> 2025/day05-py
 
 set -euo pipefail
 
@@ -25,25 +25,26 @@ if [[ -z "${COOKIE:-}" ]]; then
 fi
 
 DAY_PADDED=$(printf "%02d" "$DAY")
-DST="$YEAR/day$DAY_PADDED-go"
+DST="$YEAR/day$DAY_PADDED-py"
 
 if [[ -d "$DST" ]]; then
   echo "$DST already exists, refusing to overwrite" >&2
   exit 1
 fi
 
-if [[ ! -f "$YEAR/go.mod" ]]; then
-  echo "creating $YEAR module..."
-  mkdir -p "$YEAR"
-  (cd "$YEAR" && go mod init "github.com/danschaffer/aoc/$YEAR")
-fi
-
-if [[ ! -d "$YEAR/template" ]]; then
-  echo "error: $YEAR/template/ not found — copy it from 2024/template/" >&2
+if [[ ! -f "template.py" ]]; then
+  echo "error: template.py not found — run from the repo root" >&2
   exit 1
 fi
 
-cp -r "$YEAR/template" "$DST"
+mkdir -p "$DST"
+sed \
+  -e "s|Day|Day${DAY_PADDED}|g" \
+  -e "s|\./day\.input|\./input.txt|g" \
+  -e "s|\./day-test\.input|\./sample.txt|g" \
+  -e "s|advent of code: day|advent of code: day${DAY_PADDED}|g" \
+  template.py > "$DST/main.py"
+chmod +x "$DST/main.py"
 echo "created $DST"
 
 INPUT_URL="https://adventofcode.com/$YEAR/day/$DAY/input"
@@ -60,4 +61,4 @@ echo "input.txt: $LINES lines"
 echo
 echo "next:"
 echo "  1. paste the puzzle's example into $DST/sample.txt"
-echo "  2. open $DST/main.go, hit F5 to run"
+echo "  2. open $DST/main.py and start solving"
