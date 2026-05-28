@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+from collections import Counter
 class Day01:
     def __init__(self, file):
         self.first = []
@@ -11,21 +12,15 @@ class Day01:
                 self.second.append(int(b))
 
     def run_part1(self):
-        self.first.sort()
-        self.second.sort()
-        sum = 0
-        for i in range(len(self.first)):
-            sum += abs(self.first[i] - self.second[i])
-        return sum
-
+        first = sorted(self.first)
+        second = sorted(self.second)
+        total = 0
+        return sum(abs(a-b) for a,b in zip(self.first, self.second))
+        
     def run_part2(self):
-        sum = 0
-        freq = {}
-        for i in range(len(self.second)):
-            freq[self.second[i]] = freq.get(self.second[i], 0) + 1
-        for i in range(len(self.first)):
-            sum += self.first[i] * freq.get(self.first[i], 0)
-        return sum
+        total = 0
+        freq = Counter(self.second)
+        return sum(v * freq.get(v, 0) for v in self.first)
 
 def test1():
     test_day = Day01('./sample.txt')
